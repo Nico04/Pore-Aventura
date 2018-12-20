@@ -3,6 +3,7 @@
 public class ToggleVisibility : MonoBehaviour {
 	public GameObject StructureHolder;
 	public GameObject SpawnParticlesHolder;
+	public GameObject SpawnParticlesHolderBatch;
 	public GameObject StreamlinesHolder;
 	
 	public Material StructureTransparentMaterial;
@@ -26,6 +27,7 @@ public class ToggleVisibility : MonoBehaviour {
 		if (_askToggleSpawnParticlesVisibility) {
 			_askToggleSpawnParticlesVisibility = false;
 			SpawnParticlesHolder.SetActive(!SpawnParticlesHolder.activeInHierarchy);        //SetActive must be called in the Update() and NOT in OnGUI()
+			SpawnParticlesHolderBatch.SetActive(!SpawnParticlesHolderBatch.activeInHierarchy);        //SetActive must be called in the Update() and NOT in OnGUI()
 		}
 
 		if (_askToggleStreamlinesVisibility) {

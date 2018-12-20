@@ -16,6 +16,8 @@ public class TrajectoriesManager : MonoBehaviour {
 	public Text ShowVariableText;
 	public BuildMicrostructure BuildMicrostructure;
 	public GridSpawner GridSpawner;
+	public GridSpawnerVfx GridSpawnerVfx;
+	public GridSpawnerVfxBatch GridSpawnerVfxBatch;
 	public BuildStreamLines PopulateStreamLines;
 
 
@@ -29,6 +31,8 @@ public class TrajectoriesManager : MonoBehaviour {
 
 	private float? _trajectoriesAverageDistance;
 	public float TrajectoriesAverageDistance => _trajectoriesAverageDistance ?? (_trajectoriesAverageDistance = Trajectories.Average(t => t.Distances.Average())).GetValueOrDefault();
+
+	public float SpawnRate => 1f / (SpawnDelay / 1000f);		//In particle per second
 
 	public void AskRebuildTrajectories() {
 		_trajectories = null;
@@ -61,11 +65,13 @@ public class TrajectoriesManager : MonoBehaviour {
 			}
 		}
 
+		var trajectoriesArray = trajectories.ToArray();
+
 		//Compute stats
-		//ComputeTrajectoriesStats();
+		//ComputeTrajectoriesStats(trajectoriesArray);
 
 		//Convert to array
-		return trajectories.ToArray();
+		return trajectoriesArray;
 	}
 
 	public Trajectory BuildTrajectory(Vector3 startPosition) {
@@ -83,17 +89,15 @@ public class TrajectoriesManager : MonoBehaviour {
 			trajectory.Add(currentPoint);
 		}
 
-		//Debug.Log(trajectory.Average(p => p.magnitude) + "|" + trajectory.Count);
-
 		return trajectory.Count > 1 ? new Trajectory(trajectory.ToArray()) : null;
 	}
 
-	private void ComputeTrajectoriesStats() {
+	private void ComputeTrajectoriesStats(Trajectory[] trajectories) {
 		float max = 0f;
 		float sum = 0f;
 		int quantity = 0;
 
-		foreach (var trajectory in Trajectories) {
+		foreach (var trajectory in trajectories) {
 			for (int p = 1; p < trajectory.Points.Length; p++) {
 				//Get distance
 				var dist = Vector3.Distance(trajectory.Points[p], trajectory.Points[p - 1]);
@@ -132,6 +136,13 @@ public class TrajectoriesManager : MonoBehaviour {
 		if (!_spawnDelayKeyIsDown && Input.GetButtonDown("SpawnDelay")) {
 			_spawnDelayKeyIsDown = true;
 			SpawnDelay = _spawnDelayStepRules.StepValue(SpawnDelay, Input.GetAxis("SpawnDelay") > 0); //Math.Max(SpawnDelay + Mathf.RoundToInt(Input.GetAxis("SpawnDelay")) * 250, 0);
+
+			//Update SpawnDelay for vfx
+			GridSpawnerVfx.AskUpdateSpawnDelay();
+
+			//Update SpawnDelay for vfx batch
+			GridSpawnerVfxBatch.AskUpdateSpawnDelay();
+
 			hasChanged = true;
 		} else if (_spawnDelayKeyIsDown && Input.GetButtonUp("SpawnDelay")) {
 			_spawnDelayKeyIsDown = false;
@@ -146,6 +157,12 @@ public class TrajectoriesManager : MonoBehaviour {
 
 			//re-Build visual grid
 			GridSpawner.AskRebuild();
+
+			//Re-build spawners
+			GridSpawnerVfx.AskRebuild();
+
+			//Re-build spawner
+			GridSpawnerVfxBatch.AskRebuild();
 
 			//Re-build streamlines
 			PopulateStreamLines.AskRebuild();

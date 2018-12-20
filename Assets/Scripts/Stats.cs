@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class Stats : MonoBehaviour {
 	public List<GameObject> Holders = new List<GameObject>();
+	public GridSpawnerVfx GridSpawnerVfx;
+	public GridSpawnerVfxBatch GridSpawnerVfxBatch;
 
 	private Text _text;
 
@@ -25,7 +27,32 @@ public class Stats : MonoBehaviour {
 	}
 
 	private void UpdateStats() {
-		_text.text = Holders.Sum(h => h.transform.childCount) + " tracers";
+		_text.text = ToKMB(Holders.Sum(h => h.transform.childCount) + GridSpawnerVfx.GetTotalParticlesCount() + GridSpawnerVfxBatch.GetTotalParticlesCount()) + " tracers";
 		_stopwatch.Restart();
+	}
+
+	public static string ToKMB(int n) {
+		if (n < 1000)
+			return n.ToString();
+
+		if (n < 10000)
+			return $"{n - 5:#,.##}K";
+
+		if (n < 100000)
+			return $"{n - 50:#,.#}K";
+
+		if (n < 1000000)
+			return $"{n - 500:#,.}K";
+
+		if (n < 10000000)
+			return $"{n - 5000:#,,.##}M";
+
+		if (n < 100000000)
+			return $"{n - 50000:#,,.#}M";
+
+		if (n < 1000000000)
+			return $"{n - 500000:#,,.}M";
+
+		return $"{n - 5000000:#,,,.##}B";
 	}
 }

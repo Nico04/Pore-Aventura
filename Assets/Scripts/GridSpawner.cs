@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Experimental.VFX;
 
 public class GridSpawner : MonoBehaviour {
 	public GameObject SpawnObject;
@@ -12,7 +12,7 @@ public class GridSpawner : MonoBehaviour {
 		_askRebuild = true;
 	}
 
-	private readonly Stopwatch _elapsedSinceLastSpawn = new Stopwatch();
+	private readonly System.Diagnostics.Stopwatch _elapsedSinceLastSpawn = new System.Diagnostics.Stopwatch();
 
 
 	private void Start () {
@@ -35,6 +35,7 @@ public class GridSpawner : MonoBehaviour {
 		if (_askRebuild) {
 			SetTrajectoriesColor();
 			BuildStaticGrid();
+			_askRebuild = false;
 		}
 
 		//Wait until spawn delay is elapsed
@@ -49,10 +50,7 @@ public class GridSpawner : MonoBehaviour {
 	}
 
 	private List<GameObject> staticParticles = new List<GameObject>();
-	private void BuildStaticGrid() {
-		SpawnAll(false);
-		_askRebuild = false;
-	}
+	private void BuildStaticGrid() => SpawnAll(false);
 
 	private void SetTrajectoriesColor() {
 		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {

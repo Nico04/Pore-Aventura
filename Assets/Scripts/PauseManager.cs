@@ -3,6 +3,9 @@
 public class PauseManager : MonoBehaviour {
     public GameObject PauseUi;
 
+    public GridSpawnerVfx GridSpawnerVfx;
+    public GridSpawnerVfxBatch GridSpawnerVfxBatch;
+
     private static PauseManager _instance;
 
     private void Start() {
@@ -31,19 +34,25 @@ public class PauseManager : MonoBehaviour {
 
     private static bool _isPaused = false;
     public static bool IsPaused {
-        get { return _isPaused; }
-        set {
+        get => _isPaused;
+        private set {
             if (_isPaused == value) return;
 
             _isPaused = value;
             _instance.PauseUi?.SetActive(_isPaused);
             Cursor.lockState = _isPaused ? CursorLockMode.None : CursorLockMode.Locked;           //Warning : escape key doesn't work well in the editor (disable the screen lock)
-            
-            //When Time.timeScale == 0, FixedUpdate() will not be called and physics will be stops.
-            //In our project, will very little physics, it is not usefull to change that. 
-            //Time.timeScale = _isPaused ? 0 : 1;       
-        }
-    }
+
+			/** When Time.timeScale == 0, FixedUpdate() will not be called and physics will be stops.
+             * In our project, will very little physics, it is not usefull to change that. 
+             *
+			Time.timeScale = _isPaused ? 0 : 1;       
+			*/
+
+			//Handle Vfx
+            _instance.GridSpawnerVfx.Pause(_isPaused);
+            _instance.GridSpawnerVfxBatch.Pause(_isPaused);
+		}
+	}
 }
 
 

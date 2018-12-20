@@ -11,12 +11,9 @@ public class Loader : MonoBehaviour {
     private bool _loadingError = false;
     private AsyncOperation _asyncSceneLoad;
 
-    [SerializeField]
-    private string _scene;
-    [SerializeField]
-    private Text _loadingText;
-    [SerializeField]
-    private Text _loadingDetailsText;
+    public string Scene;
+    public Text LoadingText;
+    public Text LoadingDetailsText;
 
 	private async void Start() {
         try {
@@ -25,9 +22,9 @@ public class Loader : MonoBehaviour {
         } catch (Exception e) {
             _loadingError = true;
 
-            if (_loadingText != null) {
-                _loadingText.color = Color.red;
-                _loadingText.text = e.Message;
+            if (LoadingText != null) {
+                LoadingText.color = Color.red;
+                LoadingText.text = e.Message;
             }
         } finally {
             _loading = false;
@@ -36,7 +33,7 @@ public class Loader : MonoBehaviour {
 
     // Updates once per frame
     private void Update() {
-         _loadingText.color = new Color(_loadingText.color.r, _loadingText.color.g, _loadingText.color.b, 0.2f + Mathf.PingPong(Time.time, 0.8f));
+         LoadingText.color = new Color(LoadingText.color.r, LoadingText.color.g, LoadingText.color.b, 0.2f + Mathf.PingPong(Time.time, 0.8f));
     }
 
     private void OnGUI() {
@@ -48,7 +45,7 @@ public class Loader : MonoBehaviour {
         }
 
         if (Messager.HasNewMessages)
-            _loadingDetailsText.text += Messager.GetMessages();
+            LoadingDetailsText.text += Messager.GetMessages();
 	}
 
     private async Task Load(Action<string> action) {
@@ -73,7 +70,7 @@ public class Loader : MonoBehaviour {
 
 	private IEnumerator PreLoadScene() {
         //Pre-Load main scene
-        _asyncSceneLoad = SceneManager.LoadSceneAsync(_scene);
+        _asyncSceneLoad = SceneManager.LoadSceneAsync(Scene);
         _asyncSceneLoad.allowSceneActivation = false;
 
         //Wait for scene load. 
