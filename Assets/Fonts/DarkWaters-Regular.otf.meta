@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 0db5938a34f95d04ab8a90ca8f8fc3cc
+timeCreated: 1509097616
+licenseType: Free
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Dark Waters
+  fontNames:
+  - Dark Waters
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
