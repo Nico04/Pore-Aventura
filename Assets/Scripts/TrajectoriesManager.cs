@@ -191,7 +191,7 @@ public class Trajectory {
 
 	private Color? _color;
 	public Color Color {
-		get => _color.GetValueOrDefault();
+		get => _color ?? new Color(0, 100, 255);
 		set {
 			if (_color == value)
 				return;

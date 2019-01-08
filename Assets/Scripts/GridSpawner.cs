@@ -17,7 +17,6 @@ public class GridSpawner : MonoBehaviour {
 
 	private void Start () {
 		_elapsedSinceLastSpawn.Start();
-		_materialPropertyBlock = new MaterialPropertyBlock();
 	}
 	
 	// Update is called once per frame
@@ -108,6 +107,8 @@ public class GridSpawner : MonoBehaviour {
 	}
 
 	private static MaterialPropertyBlock _materialPropertyBlock;
+	private static MaterialPropertyBlock MaterialPropertyBlock => _materialPropertyBlock ?? (_materialPropertyBlock = new MaterialPropertyBlock());
+
 	public static GameObject CreateNewParticle(GameObject spawnObject, Trajectory trajectory, Transform parent) {
 		//Create new instance a particle
 		var particle = Instantiate(spawnObject, trajectory.StartPoint, Quaternion.identity, parent);
@@ -119,9 +120,9 @@ public class GridSpawner : MonoBehaviour {
 		//particle.GetComponent<Renderer>().material = trajectory.GetParticleMaterial(particle.GetComponent<Renderer>().material);
 
 		var renderer = particle.GetComponent<Renderer>();
-		renderer.GetPropertyBlock(_materialPropertyBlock);
-		_materialPropertyBlock.SetColor("_Color", trajectory.Color);
-		renderer.SetPropertyBlock(_materialPropertyBlock);
+		renderer.GetPropertyBlock(MaterialPropertyBlock);
+		MaterialPropertyBlock.SetColor("_Color", trajectory.Color);
+		renderer.SetPropertyBlock(MaterialPropertyBlock);
 
 		return particle;
 	}
