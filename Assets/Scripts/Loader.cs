@@ -63,8 +63,8 @@ public class Loader : MonoBehaviour {
 		StartGame();
 #else
         _loading = false;
-        _loadingText.text = "Press any key to start";
-        _loadingText.color = Color.magenta;
+        LoadingText.text = "Press any key to start";
+        LoadingText.color = Color.magenta;
 #endif
 	}
 

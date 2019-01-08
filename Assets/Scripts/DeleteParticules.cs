@@ -1,16 +1,18 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.VFX;
 
 public class DeleteParticules : MonoBehaviour {
 	public List<GameObject> Holders;
 
 	public StreamParticles StreamParticles;
 	public GridSpawner GridSpawner;
+	public VisualEffect GridSpawnerVfxBatch;
 
 	private bool _keyIsDown = false;
 
 	private void OnGUI () {
-		if (!_keyIsDown && Input.GetKeyDown(KeyCode.Delete) && !PauseManager.IsPaused) {
+		if (!_keyIsDown && (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) && !PauseManager.IsPaused) {
 			_keyIsDown = true;
 
 			//Delete all spawners
@@ -25,7 +27,10 @@ public class DeleteParticules : MonoBehaviour {
 
 			//Re-build static spawn grid
 			GridSpawner.AskRebuild();
-		} else if (_keyIsDown && Input.GetKeyUp(KeyCode.Delete)) {
+
+			//Reset Vfx
+			GridSpawnerVfxBatch.Reinit();
+		} else if (_keyIsDown && (Input.GetKeyUp(KeyCode.Delete) || Input.GetKeyUp(KeyCode.Backspace))) {
 			_keyIsDown = false;
 		}
 	}

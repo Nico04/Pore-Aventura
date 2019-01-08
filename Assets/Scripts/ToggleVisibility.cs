@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Experimental.VFX;
 
 public class ToggleVisibility : MonoBehaviour {
 	public GameObject StructureHolder;
@@ -27,7 +28,7 @@ public class ToggleVisibility : MonoBehaviour {
 		if (_askToggleSpawnParticlesVisibility) {
 			_askToggleSpawnParticlesVisibility = false;
 			SpawnParticlesHolder.SetActive(!SpawnParticlesHolder.activeInHierarchy);        //SetActive must be called in the Update() and NOT in OnGUI()
-			SpawnParticlesHolderBatch.SetActive(!SpawnParticlesHolderBatch.activeInHierarchy);        //SetActive must be called in the Update() and NOT in OnGUI()
+			SpawnParticlesHolderBatch.GetComponent<Renderer>().enabled = !SpawnParticlesHolderBatch.GetComponent<Renderer>().enabled;		//Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
 		}
 
 		if (_askToggleStreamlinesVisibility) {

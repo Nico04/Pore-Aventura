@@ -52,53 +52,10 @@ public class GridSpawnerVfxBatch : MonoBehaviour {
 		_texture.Apply();
 
 		//Apply value to VFX
+		_visualEffect.Reinit();		//Reset vfx otherwise all particules are mixed up between trajectories (colors are mixed)
 		_visualEffect.SetUInt("TextureWidth", Convert.ToUInt32(_texture.width));
 		_visualEffect.SetUInt("TrajectoriesCount", Convert.ToUInt32(trajectories.Length));
 		_visualEffect.SetTexture("Trajectories", _texture);
-
-
-		/**
-		for (int y = 0; y < _texture.height; y++) {
-			var trajectory = trajectories[y];
-			for (int x = 0; x < trajectory.Points.Length; x++) {
-				var p = trajectory.Points[x];
-				textureData[y * _texture.width + x * 4] = ScaleToRange01(p.x, 20f);
-				textureData[y * _texture.width + x * 4 + 1] = ScaleToRange01(p.y, 20f);
-				textureData[y * _texture.width + x * 4 + 2] = ScaleToRange01(p.z, 20f);
-				textureData[y * _texture.width + x * 4 + 3] = trajectory.Points.Length;		//Store length of the trajectory in the alpha channel to be used in the vfx
-			}
-		}*/
-
-
-
-		//DEBUG
-		//Texture2D texCopy = new Texture2D(_texture.width, _texture.height, _texture.format, false);
-		//texCopy.LoadRawTextureData(_texture.GetRawTextureData());
-		//texCopy.Apply();
-		//Puis comparer texture et texCopy
-
-		/**
-		var debugTexture = new Texture2D(2, 3, TextureFormat.RGBAFloat, false);
-		var debugData = debugTexture.GetRawTextureData<float>();
-		debugData[0 * 4] = 0f;
-		debugData[1 * 4] = 0f;
-		debugData[2 * 4] = -1f;
-		debugData[3 * 4] = 1f;
-		debugData[4 * 4] = float.MinValue;
-		debugData[5 * 4] = float.MaxValue;
-		debugTexture.Apply();
-		*/
-
-
-		/*
-		var debugTexture = new Texture2D(DebugTexture.width, DebugTexture.height, TextureFormat.RGBAHalf, false);
-		Graphics.ConvertTexture(DebugTexture, debugTexture);
-		debugTexture.Apply();
-
-		DebugRenderer.material.SetTexture("_UnlitColorMap", debugTexture);
-
-		Debug.Log($"{debugTexture.format} is supported = {SystemInfo.SupportsTextureFormat(debugTexture.format)}");
-		*/
 	}
 
 	//Scale an input value that goes between 0 and max, to be in range 0 to 1.

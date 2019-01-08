@@ -1408,6 +1408,7 @@ MonoBehaviour:
   - {fileID: 1101071970}
   StreamParticles: {fileID: 1101071972}
   GridSpawner: {fileID: 1824203159}
+  GridSpawnerVfxBatch: {fileID: 1342039024382583372}
 --- !u!114 &1394221636
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1610,7 +1611,7 @@ MonoBehaviour:
     <i>(<color=#ffffffff>Alt + Inject a tracer</color>)</i>\r\n - Injector period
     (ms) <i>(default : <color=#ffffffff>u</color> and <color=#ffffffff>i</color>)</i>\r\n
     - Injector grid resolution <i>(default : <color=#ffffffff>j</color> and <color=#ffffffff>k</color>)</i>\r\n
-    - Delete all tracers and injectors <i>(<color=#ffffffff>Delete</color>)</i></color>\r\n\r\n<color=#00b300ff><b>Visibility
+    - Delete all tracers and injectors <i>(<color=#ffffffff>Delete</color> OR <color=#ffffffff>Backspace</color>)</i></color>\r\n\r\n<color=#00b300ff><b>Visibility
     options</b>\r\n - Structure Visibility <i>(default : <color=#ffffffff>x</color>)</i>\r\n
     - Structure Transparency <i>(default : <color=#ffffffff>Alt + x</color>)</i>\r\n
     - Tracers Visibility <i>(default : <color=#ffffffff>c</color>)</i>\r\n - Streamlines

@@ -50,7 +50,7 @@ public class PauseManager : MonoBehaviour {
 
 			//Handle Vfx
             _instance.GridSpawnerVfx.Pause(_isPaused);
-            //_instance.GridSpawnerVfxBatch.Pause(_isPaused);
+			_instance.GridSpawnerVfxBatch.Pause(_isPaused);
 		}
 	}
 }
