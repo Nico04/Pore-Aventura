@@ -34,6 +34,7 @@ public class ToggleVisibility : MonoBehaviour {
 		if (_askToggleStreamlinesVisibility) {
 			_askToggleStreamlinesVisibility = false;
 			StreamlinesHolder.SetActive(!StreamlinesHolder.activeInHierarchy);        //SetActive must be called in the Update() and NOT in OnGUI()
+			StreamlinesHolder.GetComponent<Renderer>().enabled = !StreamlinesHolder.GetComponent<Renderer>().enabled;       //Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
 		}
 	}
 

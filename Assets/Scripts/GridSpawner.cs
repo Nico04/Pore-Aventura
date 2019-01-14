@@ -51,7 +51,7 @@ public class GridSpawner : MonoBehaviour {
 	private List<GameObject> staticParticles = new List<GameObject>();
 	private void BuildStaticGrid() => SpawnAll(false);
 
-	private void SetTrajectoriesColor() {
+	public static void SetTrajectoriesColor() {
 		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
 			trajectory.Color = Color.HSVToRGB(trajectory.StartPoint.y / TrajectoriesManager.Instance.Size, 1f, MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue));
 		}

@@ -1,11 +1,14 @@
 # Pore Aventura
 ![Logo](/Assets/Images/logo.png)
 
-Depuis l'aube de l'humanité, le chemin vers la compréhension du monde qui nous entoure est le théâtre du développement de grandes innovations technologiques permettant de répondre aux grands défis sociétaux. 
-Le déblocage de ces verrous technologiques a permis de façonner notre société, comme par exemple avec le développement de l'irrigation qui donna a l'homme l'accès à l'eau, et fut la première pierre d'un bouleversement sociétal sans précédent. 
-Bien qu'aujourd'hui les techniques d'irrigation soient largement maîtrisées, la compréhension des écoulements hydrauliques dans les sols recèle encore bien des zones d'ombre. Dans ce contexte, l'étude des milieux poreux offre un champ disciplinaire extrêmement riche où se côtoient la mécanique des fluides et la géophysique, à des échelles qui peuvent aller de l'infiniment grand (à l'échelle des planètes), à l'infiniment petit (comme le transport d'oxygène via les bronches pulmonaires).
-Fort de ce constat, une équipe à la fois soudée, humaine, et internationale à décidé de mettre ses connaissances, son savoir faire, et son expérience aguerrie au service de l'Humanité et de la Science, afin de développer Pore Aventura, un logiciel Open Source novateur se gaussant des restrictions technologiques des millénaires précédents, et permettant une immersion complète au coeur même d'un écoulement fluidique au sein d'une microstructure 3D. 
+Pore Aventura is a *3D velocity field explorer*, designed for academic research purposes. It aims at visualizing and investigating the kinematic properties of a steady 3D velocity field, which can contain solid stationary boundaries, like for instance in a porous media.
 
-Pore Aventura, c'est la possibilité d'être le témoin d'une partie du cycle de vie d'une goutte d'eau, lors de son ruissellement au travers d'un sol. 
-Pore Aventura, c'est la preuve visuelle de la complexe beauté du monde qui nous entoure. Pore Aventura, c'est un appel à la science, à toutes les Sciences, à employer les moyens numériques modernes afin de populariser et enseigner aux plus jeunes tout le caractère ludique de la recherche de pointe. 
-Pore Aventura, plus qu'une plongée dans un milieu poreux, c'est une plongée dans notre Histoire, afin d'en sortir acteur de notre Avenir.
+Among its features, Pore Aventura allows :
+* 3D motion through the velocity field
+* Local injection of passive advective tracers which flow following their streamline
+* Upstream injection grid spawning advective tracers with a tunable grid resolution and spawn delay
+* Streamlines visualization
+* Roller-coaster mode, flowing the user following its local streamline (like a passive advective tracer)
+
+
+Pore Aventura was initially developed to investigate dispersion and mixing in porous media, by providing a tool to explore the velocity intermittency, the streamlines tortuosity and the dispersion properties of an experimentally measured 3D velocity field obtained in a porous medium made out of a random stack of monodisperse rigid spherical beads.

@@ -32,7 +32,7 @@ public class GridSpawnerVfxBatch : MonoBehaviour {
 		}
 	}
 
-	private Texture2D _texture;
+	private Texture2D _texture;    //We need to keep a ref to the texture because SetTexture only make a binding.
 	private void BuildSpawners() {
 		var trajectories = TrajectoriesManager.Instance.Trajectories;
 		_texture = new Texture2D(trajectories.Max(t => t.Points.Length), trajectories.Length, TextureFormat.RGBAFloat, false);

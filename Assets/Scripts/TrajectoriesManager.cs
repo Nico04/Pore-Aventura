@@ -19,6 +19,7 @@ public class TrajectoriesManager : MonoBehaviour {
 	public GridSpawnerVfx GridSpawnerVfx;
 	public GridSpawnerVfxBatch GridSpawnerVfxBatch;
 	public BuildStreamLines PopulateStreamLines;
+	public StreamLinesVfx StreamLinesVfx;
 
 
 	private Trajectory[] _trajectories;
@@ -26,7 +27,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 
 	private float? _trajectoriesMaxDistance;
-	public float TrajectoriesMaxDistance => _trajectoriesMaxDistance ?? (_trajectoriesMaxDistance = Trajectories.Max(t => t.Distances.Max())).GetValueOrDefault();
+	public float TrajectoriesDistanceMax => _trajectoriesMaxDistance ?? (_trajectoriesMaxDistance = Trajectories.Max(t => t.Distances.Max())).GetValueOrDefault();
 
 
 	private float? _trajectoriesAverageDistance;
@@ -42,7 +43,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 	public float Spacing => Size / Resolution;
 
-	private void Start() {
+	private void Start() { 
 		if (Instance != null) throw new InvalidOperationException();
 		Instance = this;
 
@@ -54,10 +55,10 @@ public class TrajectoriesManager : MonoBehaviour {
 		var trajectories = new List<Trajectory>();
 
 		//Loop through all injection point
-		for (float y = 0.1f; y <= Size; y += Spacing) {
-			for (float z = 0.1f; z <= Size; z += Spacing) {
+		for (float y = Spacing / 2; y <= Size; y += Spacing) {
+			for (float z = Spacing / 2; z <= Size; z += Spacing) {
 				//Build one trajectory
-				var trajectory = BuildTrajectory(new Vector3(GridSpawner.gameObject.transform.position.x, y, z));
+				var trajectory = BuildTrajectory(new Vector3(GridSpawner.transform.position.x, y, z));
 
 				//Add it to master array if it is not null
 				if (trajectory != null)
@@ -167,6 +168,9 @@ public class TrajectoriesManager : MonoBehaviour {
 			//Re-build streamlines
 			PopulateStreamLines.AskRebuild();
 
+			//Re-build streamlines Vfx
+			StreamLinesVfx.AskRebuild();
+
 			hasChanged = true;
 		} else if (_spawnResolutionKeyIsDown && Input.GetButtonUp("SpawnResolution")) {
 			_spawnResolutionKeyIsDown = false;
@@ -187,11 +191,11 @@ public class Trajectory {
 	public Vector3 StartPoint => Points[0];
 
 	private float[] _distances;
-	public float[] Distances => _distances ?? (_distances = BuildDistances());
+	public float[] Distances => _distances ?? (_distances = BuildDistances());		//OPTI remove if streamLine only use Vfx method that doesn't need this.
 
 	private Color? _color;
 	public Color Color {
-		get => _color ?? new Color(0, 100, 255);
+		get => _color ?? Color.HSVToRGB(0.6f, 1f, 1f);
 		set {
 			if (_color == value)
 				return;
