@@ -53,7 +53,37 @@ public class GridSpawner : MonoBehaviour {
 
 	public static void SetTrajectoriesColor() {
 		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
-			trajectory.Color = Color.HSVToRGB(trajectory.StartPoint.y / TrajectoriesManager.Instance.Size, 1f, MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue));
+			/**
+			 trajectory.Color = Color.HSVToRGB(
+				trajectory.StartPoint.y / TrajectoriesManager.Instance.Size, 
+				1f, 
+				MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
+			);*/
+			
+			var Ymin = 0f;
+			var Ymax = TrajectoriesManager.Instance.Size;
+			var N = 5;		//Color repetition cycle number
+
+			/**
+			trajectory.Color = Color.HSVToRGB(
+				((trajectory.StartPoint.y - Ymin) % ((Ymax - Ymin) / N)) / (Ymax - Ymin),
+				(trajectory.StartPoint.y - Ymin) / (Ymax - Ymin),
+				MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
+			);
+			*/
+
+			var Zmin = 0f;
+			var Zmax = TrajectoriesManager.Instance.Size;
+			var paramS = 0.25f;
+			var paramV = 1.25f;
+			var Yc = (Ymax - Ymin) / 2;
+			var Zc = (Zmax - Zmin) / 2;
+			N = 1;
+			trajectory.Color = Color.HSVToRGB(
+				((trajectory.StartPoint.y - Yc) % ((Ymax - Ymin) / N)) * N / (Ymax - Ymin),
+				Math.Min(1, (1 - paramS) * (trajectory.StartPoint.z - Zmin) / (Zc - Zmin) + paramS),
+				1 + Math.Min(0, paramV * (Zc - trajectory.StartPoint.z) / (Zmax - Zmin))
+			);
 		}
 	}
 
