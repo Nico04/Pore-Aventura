@@ -5,8 +5,8 @@ using UnityEngine.Experimental.VFX;
 public class DeleteParticules : MonoBehaviour {
 	public List<GameObject> Holders;
 
-	public StreamParticles StreamParticles;
-	public GridSpawner GridSpawner;
+	public TracerManualInjectionBuilder TracerManualInjectionBuilder;
+	public TracerInjectionGridBuilder TracerInjectionGridBuilder;
 	public VisualEffect GridSpawnerVfxBatch;
 
 	private bool _keyIsDown = false;
@@ -16,7 +16,7 @@ public class DeleteParticules : MonoBehaviour {
 			_keyIsDown = true;
 
 			//Delete all spawners
-			StreamParticles.DeleteSpawners();
+			TracerManualInjectionBuilder.DeleteSpawners();
 
 			//Delete all particules
 			foreach (var parent in Holders) {
@@ -26,7 +26,7 @@ public class DeleteParticules : MonoBehaviour {
 			}
 
 			//Re-build static spawn grid
-			GridSpawner.AskRebuild();
+			TracerInjectionGridBuilder.AskRebuild();
 
 			//Reset Vfx
 			GridSpawnerVfxBatch.Reinit();

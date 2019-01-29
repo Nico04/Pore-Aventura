@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 33175172352762768}
   - component: {fileID: 23018844896460404}
   - component: {fileID: 114127923997692198}
-  - component: {fileID: 114720702401361350}
   m_Layer: 0
   m_Name: StreamParticle
   m_TagString: Untagged
@@ -89,17 +88,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ff5d68f361ed3d349a51c2235601dd4e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &114720702401361350
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1509666878255790}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 578e4320dce5a954dad69b1dd316d9ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

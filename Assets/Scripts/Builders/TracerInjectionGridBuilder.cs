@@ -1,41 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.Experimental.VFX;
 
-public class GridSpawner : MonoBehaviour {
+public class TracerInjectionGridBuilder : Builder {
 	public GameObject SpawnObject;
 
-	private bool _askRebuild = true;
-	public void AskRebuild() {
-		_askRebuild = true;
-	}
-
-	private readonly System.Diagnostics.Stopwatch _elapsedSinceLastSpawn = new System.Diagnostics.Stopwatch();
-
-
-	private void Start () {
+	private readonly Stopwatch _elapsedSinceLastSpawn = new System.Diagnostics.Stopwatch();
+	protected override void Start() {
+		base.Start();
 		_elapsedSinceLastSpawn.Start();
 	}
 	
 	// Update is called once per frame
-	private void Update () {
-#if DEBUG
-		//Apply limit to particles count
-		//if (transform.childCount > 5000)
-		//	return;
-#endif
+	protected override void Update () {
+		base.Update();
 
 		if (PauseManager.IsPaused)
 			return;
-
-		//Build visual grid
-		if (_askRebuild) {
-			SetTrajectoriesColor();
-			BuildStaticGrid();
-			_askRebuild = false;
-		}
 
 		//Wait until spawn delay is elapsed
 		if (TrajectoriesManager.Instance.SpawnDelay <= 0 || _elapsedSinceLastSpawn.ElapsedMilliseconds < TrajectoriesManager.Instance.SpawnDelay) 
@@ -46,6 +28,17 @@ public class GridSpawner : MonoBehaviour {
 
 		//Reset timer
 		_elapsedSinceLastSpawn.Restart();
+	}
+
+	protected override void Build() {
+		SetTrajectoriesColor();
+		BasicDispatcher.RunOnMainThread(BuildStaticGrid);
+	}
+
+	protected override void SetVisibility(bool isVisible) {
+		BasicDispatcher.RunOnMainThread(() =>
+			gameObject.SetActive(!gameObject.activeInHierarchy)        //SetActive must be called in the Update() and NOT in OnGUI()
+		);
 	}
 
 	private List<GameObject> staticParticles = new List<GameObject>();
@@ -61,7 +54,7 @@ public class GridSpawner : MonoBehaviour {
 			);*/
 			
 			var Ymin = 0f;
-			var Ymax = TrajectoriesManager.Instance.Size;
+			var Ymax = TrajectoriesManager.Instance.Size.y;
 			var N = 5;		//Color repetition cycle number
 
 			/**
@@ -73,7 +66,7 @@ public class GridSpawner : MonoBehaviour {
 			*/
 
 			var Zmin = 0f;
-			var Zmax = TrajectoriesManager.Instance.Size;
+			var Zmax = TrajectoriesManager.Instance.Size.y;
 			var paramS = 0.25f;
 			var paramV = 1.25f;
 			var Yc = (Ymax - Ymin) / 2;

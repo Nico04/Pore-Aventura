@@ -14,15 +14,15 @@ public static class DataBase  {
     //Build the speedField Array from the extracted matlab file directly ("monoVarSingle" : 1 Matlab variable de type Single[3,189,175,357] (mais attention à la transposition faite par la librairie))
     public static void BuildSpeedfield(string filePath) {
 		//Open Matlab file        
-		MyExtensions.LogWithElapsedTime("Build velocity field - Open Matlab file");
+		MethodExtensions.LogWithElapsedTime("Build velocity field - Open Matlab file");
 		var reader = new MatReader(filePath, false, false);  //With autoTranspose=false, it's 10x faster, but it is transposed.
 
 		//Store variables
-		MyExtensions.LogWithElapsedTime("Build velocity field - Read Matlab variable");
+		MethodExtensions.LogWithElapsedTime("Build velocity field - Read Matlab variable");
 		float[,,,] speedFieldMatlab = reader.Read<float[,,,]>(reader.FieldNames[0]);  //System.Double[3,189,175,357] <=> [v,z,y,x]
 
 		//Build final Vector3 array       
-		MyExtensions.LogWithElapsedTime("Build velocity field - Build internal Array");
+		MethodExtensions.LogWithElapsedTime("Build velocity field - Build internal Array");
 		VelocityField = new Vector3[speedFieldMatlab.GetUpperBound(3) + 2, speedFieldMatlab.GetUpperBound(2) + 2, speedFieldMatlab.GetUpperBound(1) + 2];
         for (int x = 0; x < VelocityField.GetUpperBound(0); x++) {
             for (int y = 0; y < VelocityField.GetUpperBound(1); y++) {

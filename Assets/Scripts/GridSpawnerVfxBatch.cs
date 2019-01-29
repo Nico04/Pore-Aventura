@@ -66,5 +66,8 @@ public class GridSpawnerVfxBatch : MonoBehaviour {
 
 	public int GetTotalParticlesCount() => _visualEffect != null ? _visualEffect.aliveParticleCount : 0;
 
-	public void Pause(bool pause) => _visualEffect.pause = pause;
+	public void Pause(bool pause) {
+		if (_visualEffect != null)
+			_visualEffect.pause = pause;
+	}
 }

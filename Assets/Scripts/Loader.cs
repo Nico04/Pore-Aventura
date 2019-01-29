@@ -54,9 +54,9 @@ public class Loader : MonoBehaviour {
         await Task.Run(() => action(dataBasePath));         //TODO handle errors        
 
 		//Load scene
-		MyExtensions.LogWithElapsedTime("Load main scene");
+		MethodExtensions.LogWithElapsedTime("Load main scene");
 		await this.StartCoroutineAsync(PreLoadScene());
-        MyExtensions.LogWithElapsedTime("");
+        MethodExtensions.LogWithElapsedTime("");
 
 		//Done
 #if DEBUG

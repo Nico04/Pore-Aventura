@@ -5,35 +5,36 @@ using UnityEngine;
 //using DigitalRuby.FastLineRenderer;
 //using Vectrosity;
 
-public class BuildStreamLines : MonoBehaviour {
+public class StreamlinesBuilder : Builder {
 #region Unity LineRenderer v2018.2
 	public GameObject Line;
-
-	private bool _askRebuild = true;
-	public void AskRebuild() {
-		_askRebuild = true;
-	}
-
+	
 	private MaterialPropertyBlock _materialPropertyBlock;
-	private void Start() {
+
+	protected override void Start() {
+		base.Start();
 		_materialPropertyBlock = new MaterialPropertyBlock();
 	}
 
-	private void Update() {
-		if (PauseManager.IsPaused)
-			return;
-
-		if (_askRebuild)
-			ReBuildStreamLines();
+	protected override void Build() {
+		BuildStreamlines();
 	}
-	
-	private void ReBuildStreamLines() {
-		_askRebuild = false;
 
+	protected override void SetVisibility(bool isVisible) {
+		BasicDispatcher.RunOnMainThread(() =>
+			gameObject.SetActive(!gameObject.activeInHierarchy)        //SetActive must be called in the Update() and NOT in OnGUI()
+		);
+	}
+
+	private async void BuildStreamlines() {
 		//Delete all existing streamlines
-		for (int i = 0; i < transform.childCount; i++) {
-			Destroy(transform.GetChild(i).gameObject);
-		}
+		await AsyncDispatcher.RunOnMainThread(() => {
+			for (int i = 0; i < transform.childCount; i++) {
+				Destroy(transform.GetChild(i).gameObject);
+			}
+
+			return null;
+		}).NoSync();
 
 		/** One line object per segment method
 		 * Usefull for setting colors easily, but very uneficient performance-wise
@@ -65,7 +66,7 @@ public class BuildStreamLines : MonoBehaviour {
 
 		return;
 		*/
-		
+
 		/** Old code
 		//Loop through all injection point
 		for (float y = 0.1f; y <= TrajectoriesManager.Size; y += TrajectoriesManager.Spacing) {
@@ -92,15 +93,19 @@ public class BuildStreamLines : MonoBehaviour {
 				lineRenderer.material.mainTexture = texture;
 			}
 		}*/
-		
-		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
-			//Create a new line renderer
-			var line = Instantiate(Line, Vector3.zero, Quaternion.identity, transform);
-			var lineRenderer = line.GetComponent<LineRenderer>();
 
-			//Apply points
-			lineRenderer.positionCount = trajectory.Points.Length;
-			lineRenderer.SetPositions(trajectory.Points);
+		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
+			LineRenderer lineRenderer = (LineRenderer)await AsyncDispatcher.RunOnMainThread(() => {
+				//Create a new line renderer
+				var line = Instantiate(Line, Vector3.zero, Quaternion.identity, transform);
+				lineRenderer = line.GetComponent<LineRenderer>();
+
+				//Apply points
+				lineRenderer.positionCount = trajectory.Points.Length;
+				lineRenderer.SetPositions(trajectory.Points);
+
+				return lineRenderer;
+			}).NoSync();
 
 			//-- Calculate colors --
 			/** Obsolete

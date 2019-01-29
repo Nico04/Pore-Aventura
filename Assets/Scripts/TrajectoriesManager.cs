@@ -11,14 +11,12 @@ public class TrajectoriesManager : MonoBehaviour {
 	public int Resolution = 15;
 	public int SpawnDelay = 500;    //in ms
 	public float TrajectoriesStep = 0.1f;
-	public float Size = 10f;
+	public Vector3 Size = new Vector3(18f, 10f, 10f);
 
 	public Text ShowVariableText;
-	public BuildMicrostructure BuildMicrostructure;
-	public GridSpawner GridSpawner;
+	public List<Builder> BuildersToUpdate = new List<Builder>();
 	public GridSpawnerVfx GridSpawnerVfx;
 	public GridSpawnerVfxBatch GridSpawnerVfxBatch;
-	public BuildStreamLines PopulateStreamLines;
 	public StreamLinesVfx StreamLinesVfx;
 
 
@@ -41,13 +39,12 @@ public class TrajectoriesManager : MonoBehaviour {
 		_trajectoriesAverageDistance = null;
 	} 
 
-	public float Spacing => Size / Resolution;
+	public float Spacing => Size.y / Resolution;
 
 	private void Start() { 
 		if (Instance != null) throw new InvalidOperationException();
 		Instance = this;
 
-		Size = BuildMicrostructure.Size.y;
 		UpdateVariableText();
 	}
 	
@@ -55,10 +52,10 @@ public class TrajectoriesManager : MonoBehaviour {
 		var trajectories = new List<Trajectory>();
 
 		//Loop through all injection point
-		for (float y = Spacing / 2; y <= Size; y += Spacing) {
-			for (float z = Spacing / 2; z <= Size; z += Spacing) {
+		for (float y = Spacing / 2; y <= Size.y; y += Spacing) {
+			for (float z = Spacing / 2; z <= Size.z; z += Spacing) {
 				//Build one trajectory
-				var trajectory = BuildTrajectory(new Vector3(GridSpawner.transform.position.x, y, z));
+				var trajectory = BuildTrajectory(new Vector3(0.1f, y, z));
 
 				//Add it to master array if it is not null
 				if (trajectory != null)
@@ -156,17 +153,14 @@ public class TrajectoriesManager : MonoBehaviour {
 			//Rebuild Trajectories 
 			AskRebuildTrajectories();
 
-			//re-Build visual grid
-			GridSpawner.AskRebuild();
+			//Rebuild builders
+			BuildersToUpdate.ForEach(b => b.AskRebuild());
 
 			//Re-build spawners
 			GridSpawnerVfx.AskRebuild();
 
 			//Re-build spawner
 			GridSpawnerVfxBatch.AskRebuild();
-
-			//Re-build streamlines
-			PopulateStreamLines.AskRebuild();
 
 			//Re-build streamlines Vfx
 			StreamLinesVfx.AskRebuild();

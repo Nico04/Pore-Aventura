@@ -2,11 +2,12 @@
 using System.Diagnostics;
 using UnityEngine;
 
-public class StreamParticles : MonoBehaviour {
+public class TracerManualInjectionBuilder : Builder {
     public GameObject SpawnObject;
     public GameObject Spawner;
 
-	private void Start() {
+    protected override void Start() {
+		base.Start();
         _elapsedSinceLastSpawn.Start();
 	}
 
@@ -27,7 +28,9 @@ public class StreamParticles : MonoBehaviour {
 
     private readonly List<Trajectory> _spawners = new List<Trajectory>();
     private readonly Stopwatch _elapsedSinceLastSpawn = new Stopwatch();
-	private void Update() {
+	protected override void Update() {
+		base.Update();
+
         if (PauseManager.IsPaused)
             return;
 
@@ -76,7 +79,7 @@ public class StreamParticles : MonoBehaviour {
     private void CreateNewParticle(Trajectory trajectory) {
 	    //return Instantiate(SpawnObject, position, Quaternion.identity, transform);
 
-	    GridSpawner.CreateNewParticle(SpawnObject, trajectory, transform);
+	    TracerInjectionGridBuilder.CreateNewParticle(SpawnObject, trajectory, transform);
     }
 
     public void DeleteSpawners() {

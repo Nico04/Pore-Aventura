@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
 
-public static class MyExtensions {
-    /**/
+public static class MethodExtensions {
     public static IEnumerator AsIEnumerator(this Task task) {
         while (!task.IsCompleted) {
             yield return null;
@@ -63,6 +63,12 @@ public static class MyExtensions {
 
         StopWatch.Restart();
     }
+
+    //Remove a bit of typo when we doesn't need the context for awaitable task
+    //see https://blogs.infinitesquare.com/posts/divers/astuce-asyncawait-et-configureawait
+    public static ConfiguredTaskAwaitable NoSync(this Task task) => task.ConfigureAwait(false);
+    public static ConfiguredTaskAwaitable<T> NoSync<T>(this Task<T> task) => task.ConfigureAwait(false);
+
 }
 
 public struct PointInt3 {
