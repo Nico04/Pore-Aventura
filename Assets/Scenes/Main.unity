@@ -1761,7 +1761,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2e70a777eb08a640815fc79327bbe1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Resolution: 50
+  Resolution: 25
   SpawnDelay: 500
   TrajectoriesStep: 0.1
   Size: {x: 18, y: 10, z: 10}
@@ -2076,11 +2076,13 @@ MonoBehaviour:
     (ms) <i>(default : <color=#ffffffff>u</color> and <color=#ffffffff>i</color>)</i>\r\n
     - Injector grid resolution <i>(default : <color=#ffffffff>j</color> and <color=#ffffffff>k</color>)</i>\r\n
     - Delete all tracers and injectors <i>(<color=#ffffffff>Delete</color> OR <color=#ffffffff>Backspace</color>)</i></color>\r\n\r\n<color=#00b300ff><b>Visibility
-    options</b>\r\n - Structure Visibility <i>(default : <color=#ffffffff>x</color>)</i>\r\n
-    - Structure Transparency <i>(default : <color=#ffffffff>Alt + x</color>)</i>\r\n
-    - Tracers Visibility <i>(default : <color=#ffffffff>c</color>)</i>\r\n - Streamlines
-    Visibility <i>(default : <color=#ffffffff>v</color>)</i>\r\n - Pause/Resume <i>(default
-    : <color=#ffffffff>Escape</color>)</i></color>"
+    options</b>\r\n - Solid Boundaries Visibility <i>(default : <color=#ffffffff>x</color>)</i>\r\n
+    - Solid Boundaries Transparency <i>(default : <color=#ffffffff>Alt + x</color>)</i>\r\n
+    - Tracers Visibility <i>(default : <color=#ffffffff>c</color>)</i>\r\n - Tracers
+    GPU Visibility <i>(default : <color=#ffffffff>Alt + c</color>)</i>\r\n - Streamlines
+    Visibility <i>(default : <color=#ffffffff>v</color>)</i>\r\n - Streamlines GPU
+    Visibility <i>(default : <color=#ffffffff>Alt + v</color>)</i>\r\n - Pause/Resume
+    <i>(default : <color=#ffffffff>Escape</color>)</i></color>"
 --- !u!222 &1573287552
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2433,15 +2435,12 @@ VisualEffect:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1342039024382583375}
   m_Enabled: 1
-  m_Asset: {fileID: 8926484042661614526, guid: abca06fd0a3899d4bbf3eb732f43d84d, type: 3}
+  m_Asset: {fileID: 8926484042661614526, guid: d2731575433d52a4e9da4a1aa04c1558, type: 3}
   m_StartSeed: 0
   m_ResetSeedOnPlay: 1
   m_PropertySheet:
     m_Float:
-      m_Array:
-      - m_Value: 2
-        m_Name: SpawnDelay
-        m_Overridden: 0
+      m_Array: []
     m_Vector2f:
       m_Array: []
     m_Vector3f:
@@ -2452,6 +2451,9 @@ VisualEffect:
       m_Array:
       - m_Value: 512
         m_Name: TextureWidth
+        m_Overridden: 0
+      - m_Value: 10
+        m_Name: TracersCount
         m_Overridden: 0
       - m_Value: 128
         m_Name: TrajectoriesCount
@@ -2466,8 +2468,11 @@ VisualEffect:
       m_Array: []
     m_NamedObject:
       m_Array:
-      - m_Value: {fileID: 0}
-        m_Name: Trajectories
+      - m_Value: {fileID: 2800000, guid: 276d9e395ae18fe40a9b4988549f2349, type: 3}
+        m_Name: Colors
+        m_Overridden: 0
+      - m_Value: {fileID: 2800000, guid: f1194d9b3428f524aac4396f56a868c9, type: 3}
+        m_Name: Positions
         m_Overridden: 0
     m_Bool:
       m_Array: []
