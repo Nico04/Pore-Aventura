@@ -8,9 +8,9 @@ public class VisibilityControler : MonoBehaviour {
 
 	public SolidBoundariesBuilder SolidBoundariesBuilder;
 	public TracerInjectionGridBuilder TracerInjectionGridBuilder;
+	public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
 	public StreamlinesBuilder StreamlinesBuilder;
-	public GameObject SpawnParticlesHolderBatch;
-	public GameObject StreamlinesHolder;
+	public StreamlinesGpuBuilder StreamlinesGpuBuilder;
 	
 	public Material StructureTransparentMaterial;
 	private Material _structureOpaqueMaterial;
@@ -49,18 +49,22 @@ public class VisibilityControler : MonoBehaviour {
 
 		if (!_tracersVisibilityKeyIsDown && Input.GetButtonDown("TracersVisibility")) {
 			_tracersVisibilityKeyIsDown = true;
-			TracerInjectionGridBuilder.IsVisible = !TracerInjectionGridBuilder.IsVisible;
 
-			//SpawnParticlesHolderBatch.GetComponent<Renderer>().enabled = !SpawnParticlesHolderBatch.GetComponent<Renderer>().enabled;		//Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
+			if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+				TracerInjectionGridGpuBuilder.IsVisible = !TracerInjectionGridGpuBuilder.IsVisible;
+			else
+				TracerInjectionGridBuilder.IsVisible = !TracerInjectionGridBuilder.IsVisible;
 		} else if (_tracersVisibilityKeyIsDown && Input.GetButtonUp("TracersVisibility")) {
 			_tracersVisibilityKeyIsDown = false;
 		}
 
 		if (!_streamlinesVisibilityKeyIsDown && Input.GetButtonDown("StreamlinesVisibility")) {
 			_streamlinesVisibilityKeyIsDown = true;
-			StreamlinesBuilder.IsVisible = !StreamlinesBuilder.IsVisible;
 
-			//StreamlinesHolder.GetComponent<Renderer>().enabled = !StreamlinesHolder.GetComponent<Renderer>().enabled;       //Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
+			if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+				StreamlinesGpuBuilder.IsVisible = !StreamlinesGpuBuilder.IsVisible;
+			else
+				StreamlinesBuilder.IsVisible = !StreamlinesBuilder.IsVisible;
 		} else if (_streamlinesVisibilityKeyIsDown && Input.GetButtonUp("StreamlinesVisibility")) {
 			_streamlinesVisibilityKeyIsDown = false;
 		}
@@ -100,7 +104,7 @@ public class VisibilityControler : MonoBehaviour {
 			text += "\n" + ColorizeUiText(builder.Name, builder.IsVisible ? Color.white : Color.gray);
 
 			//Second part
-			if (builder.IsLoading)
+			if (builder.IsBuilding)
 				text += $" <Building...>";
 
 			//Third part

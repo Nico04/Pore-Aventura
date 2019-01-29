@@ -1,30 +1,29 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Experimental.VFX;
 
-public class GridSpawnerVfxBatch : MonoBehaviour {
-	private bool _askRebuild = true;
-	public void AskRebuild() => _askRebuild = true;
+public class TracerInjectionGridGpuBuilder : Builder {
 
 	private bool _askUpdateSpawnDelay = true;
 	public void AskUpdateSpawnDelay() => _askUpdateSpawnDelay = true;
 
 	private VisualEffect _visualEffect;
-	private void Start() {
+	private Renderer _renderer;
+
+	protected override void Start() {
+		base.Start();
 		_visualEffect = GetComponent<VisualEffect>();
+		_renderer = GetComponent<Renderer>();
 	}
 
-	private void Update() {
+	protected override void Update() {
+		base.Update();
+
 		if (PauseManager.IsPaused)
 			return;
-
-		if (_askRebuild) {
-			BuildSpawners();
-			_askRebuild = false;
-		}
 
 		if (_askUpdateSpawnDelay) {
 			UpdateSpawnDelay();
@@ -33,7 +32,7 @@ public class GridSpawnerVfxBatch : MonoBehaviour {
 	}
 
 	private Texture2D _texture;    //We need to keep a ref to the texture because SetTexture only make a binding.
-	private void BuildSpawners() {
+	protected override async Task Build(CancellationToken cancellationToken) {
 		var trajectories = TrajectoriesManager.Instance.Trajectories;
 		_texture = new Texture2D(trajectories.Max(t => t.Points.Length), trajectories.Length, TextureFormat.RGBAFloat, false);
 
@@ -56,6 +55,10 @@ public class GridSpawnerVfxBatch : MonoBehaviour {
 		_visualEffect.SetUInt("TextureWidth", Convert.ToUInt32(_texture.width));
 		_visualEffect.SetUInt("TrajectoriesCount", Convert.ToUInt32(trajectories.Length));
 		_visualEffect.SetTexture("Trajectories", _texture);
+	}
+
+	protected override void SetVisibility(bool isVisible) {
+		_renderer.enabled = !_renderer.enabled;		//Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
 	}
 
 	//Scale an input value that goes between 0 and max, to be in range 0 to 1.

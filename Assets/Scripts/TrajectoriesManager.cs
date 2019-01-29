@@ -14,10 +14,10 @@ public class TrajectoriesManager : MonoBehaviour {
 	public Vector3 Size = new Vector3(18f, 10f, 10f);
 
 	public Text ShowVariableText;
-	public List<Builder> BuildersToUpdate = new List<Builder>();
+	public List<Builder> BuildersToUpdateOnResolutionChange = new List<Builder>();
 	public GridSpawnerVfx GridSpawnerVfx;
-	public GridSpawnerVfxBatch GridSpawnerVfxBatch;
-	public StreamLinesVfx StreamLinesVfx;
+	public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
+	public StreamlinesGpuBuilder StreamlinesGpuBuilder;
 
 
 	private Trajectory[] _trajectories;
@@ -139,7 +139,7 @@ public class TrajectoriesManager : MonoBehaviour {
 			GridSpawnerVfx.AskUpdateSpawnDelay();
 
 			//Update SpawnDelay for vfx batch
-			GridSpawnerVfxBatch.AskUpdateSpawnDelay();
+			TracerInjectionGridGpuBuilder.AskUpdateSpawnDelay();
 
 			hasChanged = true;
 		} else if (_spawnDelayKeyIsDown && Input.GetButtonUp("SpawnDelay")) {
@@ -154,16 +154,16 @@ public class TrajectoriesManager : MonoBehaviour {
 			AskRebuildTrajectories();
 
 			//Rebuild builders
-			BuildersToUpdate.ForEach(b => b.AskRebuild());
+			BuildersToUpdateOnResolutionChange.ForEach(b => b.AskRebuild());
 
 			//Re-build spawners
 			GridSpawnerVfx.AskRebuild();
 
 			//Re-build spawner
-			GridSpawnerVfxBatch.AskRebuild();
+			TracerInjectionGridGpuBuilder.AskRebuild();
 
 			//Re-build streamlines Vfx
-			StreamLinesVfx.AskRebuild();
+			StreamlinesGpuBuilder.AskRebuild();
 
 			hasChanged = true;
 		} else if (_spawnResolutionKeyIsDown && Input.GetButtonUp("SpawnResolution")) {

@@ -3,8 +3,7 @@
 public class PauseManager : MonoBehaviour {
     public GameObject PauseUi;
 
-    public GridSpawnerVfx GridSpawnerVfx;
-    public GridSpawnerVfxBatch GridSpawnerVfxBatch;
+    public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
 
     private static PauseManager _instance;
 
@@ -49,8 +48,7 @@ public class PauseManager : MonoBehaviour {
 			*/
 
 			//Handle Vfx
-            _instance.GridSpawnerVfx.Pause(_isPaused);
-			_instance.GridSpawnerVfxBatch.Pause(_isPaused);
+			_instance.TracerInjectionGridGpuBuilder.Pause(_isPaused);
 		}
 	}
 }

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class Stats : MonoBehaviour {
 	public List<GameObject> Holders = new List<GameObject>();
 	public GridSpawnerVfx GridSpawnerVfx;
-	public GridSpawnerVfxBatch GridSpawnerVfxBatch;
+	public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
 
 	private Text _text;
 
@@ -27,7 +27,7 @@ public class Stats : MonoBehaviour {
 	}
 
 	private void UpdateStats() {
-		_text.text = ToKMB(Holders.Sum(h => h.transform.childCount) + GridSpawnerVfx.GetTotalParticlesCount() + GridSpawnerVfxBatch.GetTotalParticlesCount()) + " tracers";
+		_text.text = ToKMB(Holders.Sum(h => h.transform.childCount) + GridSpawnerVfx.GetTotalParticlesCount() + TracerInjectionGridGpuBuilder.GetTotalParticlesCount()) + " tracers";
 		_stopwatch.Restart();
 	}
 

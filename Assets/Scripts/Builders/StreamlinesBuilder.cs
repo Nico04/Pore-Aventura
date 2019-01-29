@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 //using DigitalRuby.FastLineRenderer;
@@ -16,8 +18,61 @@ public class StreamlinesBuilder : Builder {
 		_materialPropertyBlock = new MaterialPropertyBlock();
 	}
 
-	protected override void Build() {
-		BuildStreamlines();
+	protected override async Task Build(CancellationToken cancellationToken) {
+		cancellationToken.ThrowIfCancellationRequested();
+
+		//Delete all existing streamlines
+		for (int i = 0; i < transform.childCount; i++) {
+			Destroy(transform.GetChild(i).gameObject);
+		}
+		
+		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
+			cancellationToken.ThrowIfCancellationRequested();
+
+			//Create a new line renderer
+			var line = Instantiate(Line, Vector3.zero, Quaternion.identity, transform);
+			var lineRenderer = line.GetComponent<LineRenderer>();
+
+			//Apply points
+			lineRenderer.positionCount = trajectory.Points.Length;
+			lineRenderer.SetPositions(trajectory.Points);
+
+			//-- Calculate colors --
+			cancellationToken.ThrowIfCancellationRequested();
+			Color32[] colors = null;
+			int textureSize = 0;
+
+			await Task.Run(() => {
+				var distances = trajectory.Distances;
+				textureSize = Mathf.CeilToInt(distances.Length / 10f);
+				var distanceIncrement = distances.Sum() / (textureSize - 1);
+
+				var colorValues = new float[textureSize];
+				int currentDistanceIndex = 0;
+				var currentDistance = distances[currentDistanceIndex];
+				for (int i = 0; i < colorValues.Length; i++) {
+					while (currentDistance < distanceIncrement * i && currentDistanceIndex + 1 < distances.Length)  //Index condition needed because of float imprecision.
+						currentDistance += distances[++currentDistanceIndex];
+
+					colorValues[i] = distances[currentDistanceIndex];
+				}
+
+				colors = colorValues.Select(s => (Color32) Color.Lerp(Color.blue, Color.red, s / (3 * TrajectoriesManager.Instance.TrajectoriesAverageDistance))).ToArray();
+			}, cancellationToken).ConfigureAwait(true);
+			
+
+			//Apply colors
+			var texture = new Texture2D(textureSize, 1);
+			texture.SetPixels32(colors);
+			texture.Apply();
+			lineRenderer.material.mainTexture = texture;
+
+			/** TODO This method render black line when app is launched. Work fine after change de resolution (rebuild).
+			lineRenderer.GetPropertyBlock(_materialPropertyBlock);
+			_materialPropertyBlock.SetTexture("_MainTex", texture);
+			lineRenderer.SetPropertyBlock(_materialPropertyBlock);
+			*/
+		}
 	}
 
 	protected override void SetVisibility(bool isVisible) {

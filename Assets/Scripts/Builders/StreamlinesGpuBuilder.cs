@@ -1,32 +1,23 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Experimental.VFX;
 
-public class StreamLinesVfx : MonoBehaviour {
-	private bool _askRebuild = true;
-	public void AskRebuild() => _askRebuild = true;
-
+public class StreamlinesGpuBuilder : Builder {
 	private VisualEffect _visualEffect;
-	private void Start() {
-		_visualEffect = GetComponent<VisualEffect>();
-	}
-	
-	void Update() {
-		if (PauseManager.IsPaused)
-			return;
+	private Renderer _renderer;
 
-		if (_askRebuild) {
-			BuildStreamLines();
-			_askRebuild = false;
-		}
+	protected override void Start() {
+		base.Start();
+		_visualEffect = GetComponent<VisualEffect>();
+		_renderer = GetComponent<Renderer>();
 	}
 
 	private const float SampleValue = 1;
 	private Texture2D _texture;    //We need to keep a ref to the texture because SetTexture only make a binding.
-	private void BuildStreamLines() {
+	protected override async Task Build(CancellationToken cancellationToken) {
 		var trajectories = TrajectoriesManager.Instance.Trajectories;
 		int size = (int)Math.Ceiling(Math.Sqrt(trajectories.Sum(t => Math.Ceiling(t.Points.Length / SampleValue))));
 		_texture = new Texture2D(size, size, TextureFormat.RGBAFloat, false);       //Unity max texture width or height is 16k : cannot use a mono-line texture.
@@ -51,5 +42,9 @@ public class StreamLinesVfx : MonoBehaviour {
 		_visualEffect.SetTexture("Trajectories", _texture);
 
 		Debug.Log($"BuildStreamLines|size={size}|");
+	}
+
+	protected override void SetVisibility(bool isVisible) {
+		_renderer.enabled = !_renderer.enabled;     //Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
 	}
 }

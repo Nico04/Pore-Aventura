@@ -6,19 +6,20 @@ using UnityEngine;
 
 public class Builder : MonoBehaviour {
 	public static List<Builder> Builders = new List<Builder>();
-	
+	private static bool _buildersIsSorted = false;
+
 	public string Name = "Builder";
 
 	public enum Types { None, Cpu, Gpu }
 	[NonSerialized]
 	public Types Type = Types.None;
 
-	private bool _isLoading = false;
-	public bool IsLoading {
-		get => _isLoading;
+	private bool _isBuilding = false;
+	public bool IsBuilding {
+		get => _isBuilding;
 		set {
-			bool hasChanged = _isLoading != value;
-			_isLoading = value;
+			bool hasChanged = _isBuilding != value;
+			_isBuilding = value;
 
 			if (hasChanged && VisibilityControler.Instance != null)
 				VisibilityControler.Instance.AskBuildersStatusUpdate();
@@ -42,7 +43,10 @@ public class Builder : MonoBehaviour {
 	protected virtual void SetVisibility(bool isVisible) => throw new MethodAccessException();
 
 	private bool _isDirty = true;
-	public void AskRebuild() => _isDirty = true;
+	public void AskRebuild() {
+		CancelBuild();
+		_isDirty = true;
+	}
 
 	private CancellationTokenSource _buildCancellationToken;
 	public void CancelBuild() => _buildCancellationToken?.Cancel();
@@ -52,10 +56,13 @@ public class Builder : MonoBehaviour {
 		_buildersIsSorted = false;
 	}
 
-	private Task _buildTask;
-	protected virtual void Build() => Debug.Log($"{GetType().Name}.Build : Empty Build Method");
+	protected virtual Task Build(CancellationToken cancellationToken) {
+		Debug.Log($"{GetType().Name}.Build : Empty Build Method");
+		return Task.CompletedTask;
+	}
 
-	private bool _buildersIsSorted = false;
+	
+	
 	protected virtual void Start() {
 		if (!_buildersIsSorted) {
 			Builders.Sort((b1, b2) => string.Compare(b1.Name, b2.Name, StringComparison.InvariantCulture));
@@ -63,14 +70,36 @@ public class Builder : MonoBehaviour {
 		}
 	}
 
-	protected virtual void Update() {
-		if (!_isDirty || !IsVisible)
+	protected virtual async void Update() {
+		if (!_isDirty || !IsVisible || IsBuilding)
 			return;
 
 		_isDirty = false;
-		StartBuild();
+		await StartBuild().NoSync();
 	}
 
+	private async Task StartBuild() {
+		try {
+			//Prepare
+			IsBuilding = true;
+			_buildCancellationToken = new CancellationTokenSource();
+
+			//Run task
+			await Build(_buildCancellationToken.Token).NoSync();
+		} catch (Exception exception) {
+			//rethrow if it's NOT a wanted cancellation
+			if (_buildCancellationToken?.IsCancellationRequested != true) {
+				Debug.LogException(exception);
+				throw;
+			}
+		} finally {
+			IsBuilding = false;
+			_buildCancellationToken?.Dispose();
+			_buildCancellationToken = null;
+		}
+	}
+
+	/** Multi-thread Method, works but not very effective here as a lot of code needs to be run on Main Thread
 	//Start a new task, but cancel the previous one if running
 	private async void StartBuild() {
 		//If task is already running
@@ -103,7 +132,7 @@ public class Builder : MonoBehaviour {
 		_buildTask = Task.Run(() => {
 			try {
 				Debug.Log($"{GetType().Name}.Build : start (_currentCameraTask id : {_buildTask?.Id})");
-				IsLoading = true;
+				IsBuilding = true;
 
 				//Start build
 				Build();
@@ -115,7 +144,7 @@ public class Builder : MonoBehaviour {
 				}
 			} finally {
 				Debug.Log($"{GetType().Name}.Build : start of finally (_currentCameraTask id : {_buildTask?.Id} | _currentCameraTaskCancellation.IsCancellationRequested : {_buildCancellationToken?.IsCancellationRequested == true})");
-				IsLoading = false;
+				IsBuilding = false;
 
 				_buildTask = null;
 				_buildCancellationToken?.Dispose();
@@ -124,5 +153,5 @@ public class Builder : MonoBehaviour {
 				Debug.Log($"{GetType().Name}.Build : end of finally");
 			}
 		});
+	}*/
 	}
-}

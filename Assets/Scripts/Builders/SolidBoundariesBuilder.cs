@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class SolidBoundariesBuilder : Builder {
@@ -12,15 +14,13 @@ public class SolidBoundariesBuilder : Builder {
 	    _csvText = CsvFile.text;
     }
 
-    protected override void Build () {
-        _coordinates = DataBase.CsvToVector3List(_csvText)[0].ToArray();
+    protected override async Task Build (CancellationToken cancellationToken) {
+		_coordinates = await Task.Run(() => DataBase.CsvToVector3List(_csvText)[0].ToArray(), cancellationToken).ConfigureAwait(true);
 
-        foreach (Vector3 position in _coordinates) {
-			BasicDispatcher.RunOnMainThread(() => 
-				Instantiate(ObjectToPopulate, position, Quaternion.identity, transform)
-			);
-		}
-    }
+		foreach (Vector3 position in _coordinates) {
+	        Instantiate(ObjectToPopulate, position, Quaternion.identity, transform);
+        }
+	}
 
     protected override void SetVisibility(bool isVisible) {
 	    BasicDispatcher.RunOnMainThread(() =>

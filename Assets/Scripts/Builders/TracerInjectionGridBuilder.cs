@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class TracerInjectionGridBuilder : Builder {
@@ -30,9 +32,12 @@ public class TracerInjectionGridBuilder : Builder {
 		_elapsedSinceLastSpawn.Restart();
 	}
 
-	protected override void Build() {
-		SetTrajectoriesColor();
-		BasicDispatcher.RunOnMainThread(BuildStaticGrid);
+	protected override async Task Build(CancellationToken cancellationToken) {
+		cancellationToken.ThrowIfCancellationRequested();
+		await Task.Run(action: SetTrajectoriesColor, cancellationToken: cancellationToken).ConfigureAwait(true);
+
+		cancellationToken.ThrowIfCancellationRequested();
+		BuildStaticGrid();
 	}
 
 	protected override void SetVisibility(bool isVisible) {
