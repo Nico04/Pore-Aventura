@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.39321536, g: 0.62086505, b: 0.89281607, a: 1}
+  m_IndirectSpecularColor: {r: 0.39295852, g: 0.6204829, b: 0.8925741, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1761,7 +1761,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2e70a777eb08a640815fc79327bbe1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Resolution: 25
+  Resolution: 50
   SpawnDelay: 500
   TrajectoriesStep: 0.1
   Size: {x: 18, y: 10, z: 10}
@@ -2449,6 +2449,9 @@ VisualEffect:
       m_Array: []
     m_Uint:
       m_Array:
+      - m_Value: 50
+        m_Name: Animation Speed
+        m_Overridden: 1
       - m_Value: 512
         m_Name: TextureWidth
         m_Overridden: 0
@@ -2559,3 +2562,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: 3.b. Advective Tracers - Injection Grid [GPU]
+  TracerSpacing: 50
+  VFXRefreshFrequency: 1
