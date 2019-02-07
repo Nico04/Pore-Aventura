@@ -1761,7 +1761,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2e70a777eb08a640815fc79327bbe1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Resolution: 50
+  Resolution: 25
   SpawnDelay: 500
   TrajectoriesStep: 0.1
   Size: {x: 18, y: 10, z: 10}
@@ -2449,17 +2449,14 @@ VisualEffect:
       m_Array: []
     m_Uint:
       m_Array:
-      - m_Value: 50
-        m_Name: Animation Speed
-        m_Overridden: 1
-      - m_Value: 512
-        m_Name: TextureWidth
+      - m_Value: 10
+        m_Name: AnimationSpeed
+        m_Overridden: 0
+      - m_Value: 5
+        m_Name: PositionsCount
         m_Overridden: 0
       - m_Value: 10
         m_Name: TracersCount
-        m_Overridden: 0
-      - m_Value: 128
-        m_Name: TrajectoriesCount
         m_Overridden: 0
     m_Int:
       m_Array: []
@@ -2562,5 +2559,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: 3.b. Advective Tracers - Injection Grid [GPU]
-  TracerSpacing: 50
-  VFXRefreshFrequency: 1

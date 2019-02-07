@@ -9,8 +9,9 @@ public class TracerInjectionGridGpuBuilder : Builder {
 
 	private bool _askUpdateSpawnDelay = true;
 	public void AskUpdateSpawnDelay() => _askUpdateSpawnDelay = true;
-    public int TracerSpacing = 50;
-    public int VFXRefreshFrequency = 10;
+    private int _tracerSpacing;
+    private int _animationSpeed = 50;
+    //public int VFXRefreshFrequency = 10;
 
     private VisualEffect _visualEffect;
 	private Renderer _renderer;
@@ -35,7 +36,7 @@ public class TracerInjectionGridGpuBuilder : Builder {
 	
 	private Texture2D _positionsTexture;    //We need to keep a ref to the texture because SetTexture only make a binding.
 	private Texture2D _colorsTexture;    //We need to keep a ref to the texture because SetTexture only make a binding.
-    
+
     protected override async Task Build(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -49,14 +50,15 @@ public class TracerInjectionGridGpuBuilder : Builder {
             _visualEffect.Reinit();
             return;
         }
-		int tracerSpacing = TracerSpacing;
+		int tracerSpacing = _tracerSpacing;
 		int tracersCount = trajectories.Sum(t => (int) (t.Points.Length / tracerSpacing));
         if (tracersCount <= 0)
         {
             _visualEffect.Reinit();
             return;
         }
-        int textureWidth = Mathf.CeilToInt(Mathf.Sqrt(tracersCount * tracerSpacing));
+        int positionsCount = tracersCount * tracerSpacing;
+        int textureWidth = Mathf.CeilToInt(Mathf.Sqrt(positionsCount));
 
 		_positionsTexture = new Texture2D(textureWidth, textureWidth, TextureFormat.RGBAFloat, false) {
 			filterMode = FilterMode.Point,
@@ -74,48 +76,44 @@ public class TracerInjectionGridGpuBuilder : Builder {
         //Apply value to VFX
         _visualEffect.Reinit();     //Reset vfx otherwise all particules are mixed up between trajectories (colors are mixed)
         _visualEffect.SetUInt("TracersCount", Convert.ToUInt32(tracersCount));
+        _visualEffect.SetUInt("PositionsCount", Convert.ToUInt32(positionsCount));
+        _visualEffect.SetUInt("AnimationSpeed", Convert.ToUInt32(_animationSpeed));
 
         int tracersSum = 0;
 
-        /** Loop on points index then on trajectories */
+        /** Loop on points indices then on trajectories */
         var longEnoughTraj = trajectories;
         int longEnoughTrajCount = 0;
         int maxPointsInOneTraj = trajectories.Max(tr => tr.Points.Length) / tracerSpacing * tracerSpacing;
         
-        for (int m = 0; m < maxPointsInOneTraj; m += maxPointsInOneTraj / VFXRefreshFrequency)
+        for (int p = 0; p < maxPointsInOneTraj; p++)
         {
-            await Task.Run(() =>
+            if (p % tracerSpacing == 0)
             {
-                for (int p = m; p < m + maxPointsInOneTraj / VFXRefreshFrequency; p++)
-                {
-                    if (p % tracerSpacing == 0)
-                    {
-                        tracersSum += longEnoughTrajCount;
-                        longEnoughTraj = longEnoughTraj.Where(t => p < (int)(t.Points.Length / tracerSpacing) * tracerSpacing).ToArray();
-                        longEnoughTrajCount = longEnoughTraj.Length;
-                    }
-                    for (int t = 0; t < longEnoughTrajCount; t++)
-                    {
-                        var traj = longEnoughTraj[t];
-                        var point = traj.Points[p];
+                tracersSum += longEnoughTrajCount;
+                longEnoughTraj = longEnoughTraj.Where(t => p < (int)(t.Points.Length / tracerSpacing) * tracerSpacing).ToArray();
+                longEnoughTrajCount = longEnoughTraj.Length;
+            }
+            // Loop on trajectories containing at least p indices
+            for (int t = 0; t < longEnoughTrajCount; t++)
+            {
+                var traj = longEnoughTraj[t];
+                var point = traj.Points[p];
 
-                        int pixelIndex = t + tracersSum + (p % tracerSpacing) * tracersCount;
-                        positionsTextureData[pixelIndex] = point;
-                        colorsTextureData[pixelIndex] = Color.HSVToRGB(traj.Color.r, traj.Color.g, traj.Color.b);
-                    }
-                }
-            }, cancellationToken).ConfigureAwait(true);
-
-            _positionsTexture.Apply();
-            _colorsTexture.SetPixels32(colorsTextureData);
-            _colorsTexture.Apply();
-
-            //Apply value to VFX
-            //_visualEffect.Reinit();
-            _visualEffect.SetTexture("Positions", _positionsTexture);
-            _visualEffect.SetTexture("Colors", _colorsTexture);
-            
+                int pixelIndex = t + tracersSum + (p % tracerSpacing) * tracersCount;
+                positionsTextureData[pixelIndex] = point;
+                colorsTextureData[pixelIndex] = Color.HSVToRGB(traj.Color.r, traj.Color.g, traj.Color.b);
+            }
         }
+
+        _positionsTexture.Apply();
+        _colorsTexture.SetPixels32(colorsTextureData);
+        _colorsTexture.Apply();
+
+        //Apply value to VFX
+        //_visualEffect.Reinit();
+        _visualEffect.SetTexture("Positions", _positionsTexture);
+        _visualEffect.SetTexture("Colors", _colorsTexture);            
 
         /** Loop on trajectories then on points (minimum iterations number)
         for (int m = 0; m < trajectories.Length; m += trajectories.Length / VFXRefreshPeriod)
@@ -188,7 +186,8 @@ public class TracerInjectionGridGpuBuilder : Builder {
 	private float ScaleToRange01(float value, float max) => value / max;
 	private static float PositionToColor(float position) => position * 1f / 20;
 
-	private void UpdateSpawnDelay() => Debug.Log("toto");	// _visualEffect.SetFloat("SpawnDelay", TrajectoriesManager.Instance.SpawnDelay / 1000f);
+    // TODO verify the rule between spawn delay, spacing and animation speed
+	private void UpdateSpawnDelay() => _tracerSpacing = Mathf.Max((int)(TrajectoriesManager.Instance.SpawnDelay / 1000f * _animationSpeed), 1);	// _visualEffect.SetFloat("SpawnDelay", TrajectoriesManager.Instance.SpawnDelay / 1000f);
 
 	public int GetTotalParticlesCount() => _visualEffect != null ? _visualEffect.aliveParticleCount : 0;
 

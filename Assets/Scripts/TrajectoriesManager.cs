@@ -140,8 +140,9 @@ public class TrajectoriesManager : MonoBehaviour {
 
 			//Update SpawnDelay for vfx batch
 			TracerInjectionGridGpuBuilder.AskUpdateSpawnDelay();
+            TracerInjectionGridGpuBuilder.AskRebuild();
 
-			hasChanged = true;
+            hasChanged = true;
 		} else if (_spawnDelayKeyIsDown && Input.GetButtonUp("SpawnDelay")) {
 			_spawnDelayKeyIsDown = false;
 		}
