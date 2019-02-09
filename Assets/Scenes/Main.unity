@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.39295852, g: 0.6204829, b: 0.8925741, a: 1}
+  m_IndirectSpecularColor: {r: 0.39321536, g: 0.62086505, b: 0.89281607, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1764,7 +1764,6 @@ MonoBehaviour:
   Resolution: 25
   SpawnDelay: 500
   TrajectoriesStep: 0.1
-  Size: {x: 18, y: 10, z: 10}
   ShowVariableText: {fileID: 505284073}
   BuildersToUpdateOnResolutionChange:
   - {fileID: 95622633}

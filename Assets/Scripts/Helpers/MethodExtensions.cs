@@ -6,6 +6,7 @@ using UnityEngine;
 
 
 public static class MethodExtensions {
+    /** Unused
     public static IEnumerator AsIEnumerator(this Task task) {
         while (!task.IsCompleted) {
             yield return null;
@@ -14,8 +15,9 @@ public static class MethodExtensions {
         if (task.IsFaulted) {
             throw task.Exception;
         }
-    }
+    }*/
 
+    /** Unused
     public static float GetCoordinateByIndex(this Vector3 vec, int coordinateIndex) {
         switch (coordinateIndex) {
             case 0:
@@ -27,9 +29,9 @@ public static class MethodExtensions {
             default:
                 throw new System.Exception("coordinateIndex must be between 0 and 2");
         }
-    }
+    }*/
 
-    /***As Vector3 is a struct, any modification done in this struc is not saved because it is passed by value...
+	/***As Vector3 is a struct, any modification done in this struc is not saved because it is passed by value...
     public static void setCoordinateByIndex(this Vector3 vec, int coordinateIndex, float value) {
         switch (coordinateIndex) {
             case 0:
@@ -46,6 +48,7 @@ public static class MethodExtensions {
         }
     }*/
 
+	/** Unused
     public static string ToStringLong(this Vector3 vec) {
         string[] output = new string[3];
         for (int i = 0; i < output.Length; i++) {
@@ -53,9 +56,9 @@ public static class MethodExtensions {
         }
 
         return $"({output[0]},{output[1]},{output[2]})";
-    }
+    }*/
 
-    private static readonly System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
+	private static readonly System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
     public static void LogWithElapsedTime(string message) {
 		string timeElapsed = Mathf.RoundToInt((float)StopWatch.Elapsed.TotalMilliseconds) + "ms";
         Debug.Log(message + (StopWatch.IsRunning ? $" ({timeElapsed})" : ""));

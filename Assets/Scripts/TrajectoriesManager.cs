@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Accord.Math.Geometry;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +10,6 @@ public class TrajectoriesManager : MonoBehaviour {
 	public int Resolution = 15;
 	public int SpawnDelay = 500;    //in ms
 	public float TrajectoriesStep = 0.1f;
-	public Vector3 Size = new Vector3(18f, 10f, 10f);
 
 	public Text ShowVariableText;
 	public List<Builder> BuildersToUpdateOnResolutionChange = new List<Builder>();
@@ -31,29 +29,29 @@ public class TrajectoriesManager : MonoBehaviour {
 	private float? _trajectoriesAverageDistance;
 	public float TrajectoriesAverageDistance => _trajectoriesAverageDistance ?? (_trajectoriesAverageDistance = Trajectories.Average(t => t.Distances.Average())).GetValueOrDefault();
 
-	public float SpawnRate => 1f / (SpawnDelay / 1000f);		//In particle per second
+	public float SpawnRate => 1f / (SpawnDelay / 1000f);        //In particle per second
 
 	public void AskRebuildTrajectories() {
 		_trajectories = null;
 		_trajectoriesMaxDistance = null;
 		_trajectoriesAverageDistance = null;
-	} 
+	}
 
-	public float Spacing => Size.y / Resolution;
+	public float Spacing => DataBase.DataSpaceSize.y / Resolution;
 
-	private void Start() { 
+	private void Start() {
 		if (Instance != null) throw new InvalidOperationException();
 		Instance = this;
 
 		UpdateVariableText();
 	}
-	
+
 	private Trajectory[] BuildTrajectories() {
 		var trajectories = new List<Trajectory>();
 
 		//Loop through all injection point
-		for (float y = Spacing / 2; y <= Size.y; y += Spacing) {
-			for (float z = Spacing / 2; z <= Size.z; z += Spacing) {
+		for (float y = Spacing / 2; y <= DataBase.DataSpaceSize.y; y += Spacing) {
+			for (float z = Spacing / 2; z <= DataBase.DataSpaceSize.z; z += Spacing) {
 				//Build one trajectory
 				var trajectory = BuildTrajectory(new Vector3(0.1f, y, z));
 
@@ -72,20 +70,41 @@ public class TrajectoriesManager : MonoBehaviour {
 		return trajectoriesArray;
 	}
 
+	//private System.Diagnostics.Stopwatch _debugStopwatch;
+
 	public Trajectory BuildTrajectory(Vector3 startPosition) {
 		//Init list
 		var trajectory = new List<Vector3> { startPosition };
 		var currentPoint = trajectory[0];
 
+
+		//_debugStopwatch?.Stop();
+		//_debugStopwatch = System.Diagnostics.Stopwatch.StartNew();
+		//var maxLog = 0;
+		//System.IO.StreamWriter file = null;
+
 		//Get speed at currentPoint
 		Vector3 currentSpeed;
-		while (!DataBase.IsSpeedTooLow(currentSpeed = DataBase.GetSpeedAtPoint(currentPoint))) {		//TODO use IsSpeedTooLow everywhere
+		while (!DataBase.IsSpeedTooLow(currentSpeed = DataBase.GetInterpolatedVelocityAtPosition(currentPoint))) {
+			//TODO use IsSpeedTooLow everywhere
 			//Move to next point by going into the speed direction by a defined distance
 			currentPoint += currentSpeed * TrajectoriesStep;
 
 			//Add point to list
 			trajectory.Add(currentPoint);
+
+
+			//if (_debugStopwatch.Elapsed.Seconds > 10 && maxLog++ < 1000) {
+			//	Debug.Log($"currentPoint = ({currentPoint.x:0.0000}, {currentPoint.y:0.0000}, {currentPoint.z:0.0000})");
+
+			//	if (file == null )
+			//		file = new System.IO.StreamWriter(@"C:\Users\Public\temp\log.txt");
+			//	file.WriteLine($"{currentPoint.x:0.0000}|{currentPoint.y:0.0000}|{currentPoint.z:0.0000}||{currentSpeed.x:0.0000}|{currentSpeed.y:0.0000}|{currentSpeed.z:0.0000}|{currentSpeed.magnitude:0.0000}");
+			//}
 		}
+
+
+		//file?.Close();
 
 		return trajectory.Count > 1 ? new Trajectory(trajectory.ToArray()) : null;
 	}
@@ -99,7 +118,7 @@ public class TrajectoriesManager : MonoBehaviour {
 			for (int p = 1; p < trajectory.Points.Length; p++) {
 				//Get distance
 				var dist = Vector3.Distance(trajectory.Points[p], trajectory.Points[p - 1]);
-				
+
 				//Get max
 				if (dist > max)
 					max = dist;
@@ -116,7 +135,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 	public Vector3 GetNextTrajectoryPosition(Vector3[] trajectory, ref int currentPositionIndex) => trajectory.ElementAtOrDefault(++currentPositionIndex);
 
-	private StepRules _spawnDelayStepRules = new StepRules(new List<StepRange> { 
+	private StepRules _spawnDelayStepRules = new StepRules(new List<StepRange> {
 		new StepRange(0, 500, 100),
 		new StepRange(500, 2000, 250),
 		new StepRange(2000, int.MaxValue, 1000)
@@ -140,9 +159,9 @@ public class TrajectoriesManager : MonoBehaviour {
 
 			//Update SpawnDelay for vfx batch
 			TracerInjectionGridGpuBuilder.AskUpdateSpawnDelay();
-            TracerInjectionGridGpuBuilder.AskRebuild();
+			TracerInjectionGridGpuBuilder.AskRebuild();
 
-            hasChanged = true;
+			hasChanged = true;
 		} else if (_spawnDelayKeyIsDown && Input.GetButtonUp("SpawnDelay")) {
 			_spawnDelayKeyIsDown = false;
 		}
@@ -150,7 +169,7 @@ public class TrajectoriesManager : MonoBehaviour {
 		if (!_spawnResolutionKeyIsDown && Input.GetButtonDown("SpawnResolution")) {
 			_spawnResolutionKeyIsDown = true;
 			Resolution = _resolutionStepRules.StepValue(Resolution, Input.GetAxis("SpawnResolution") > 0); //Math.Max(Resolution + Mathf.RoundToInt(Input.GetAxis("SpawnResolution")) * 5, 0);
-			
+
 			//Rebuild Trajectories 
 			AskRebuildTrajectories();
 
@@ -186,7 +205,7 @@ public class Trajectory {
 	public Vector3 StartPoint => Points[0];
 
 	private float[] _distances;
-	public float[] Distances => _distances ?? (_distances = BuildDistances());		//OPTI remove if streamLine only use Vfx method that doesn't need this.
+	public float[] Distances => _distances ?? (_distances = BuildDistances());      //OPTI remove if streamLine only use Vfx method that doesn't need this.
 
 	private Color? _color;
 	public Color Color {
@@ -210,7 +229,7 @@ public class Trajectory {
 
 		baseMaterial.color = Color;
 		return _particleMaterial = baseMaterial;
-	} 
+	}
 
 	public Trajectory(Vector3[] points) {
 		Points = points;

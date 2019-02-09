@@ -59,7 +59,7 @@ public class TracerInjectionGridBuilder : Builder {
 			);*/
 			
 			var Ymin = 0f;
-			var Ymax = TrajectoriesManager.Instance.Size.y;
+			var Ymax = DataBase.DataSpaceSize.y;
 			var N = 5;		//Color repetition cycle number
 
 			/**
@@ -71,16 +71,16 @@ public class TracerInjectionGridBuilder : Builder {
 			*/
 
 			var Zmin = 0f;
-			var Zmax = TrajectoriesManager.Instance.Size.y;
+			var Zmax = DataBase.DataSpaceSize.z;
 			var paramS = 0.25f;
 			var paramV = 1.25f;
-			var Yc = (Ymax - Ymin) / 2;
-			var Zc = (Zmax - Zmin) / 2;
+			var Yc = (Ymax + Ymin) / 2;
+			var Zc = (Zmax + Zmin) / 2;
 			N = 1;
 			trajectory.Color = Color.HSVToRGB(
 				((trajectory.StartPoint.y - Yc) % ((Ymax - Ymin) / N)) * N / (Ymax - Ymin),
-				Math.Min(1, (1 - paramS) * (trajectory.StartPoint.z - Zmin) / (Zc - Zmin) + paramS),
-				1 + Math.Min(0, paramV * (Zc - trajectory.StartPoint.z) / (Zmax - Zmin))
+				Math.Min(1f, (1 - paramS) * (trajectory.StartPoint.z - Zmin) / (Zc - Zmin) + paramS),
+				1 + Math.Min(0f, paramV * (Zc - trajectory.StartPoint.z) / (Zmax - Zmin))
 			);
 		}
 	}

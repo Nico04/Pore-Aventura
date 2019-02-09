@@ -18,7 +18,7 @@ public class Loader : MonoBehaviour {
 	private async void Start() {
         try {
             _loading = true;
-            await Load(DataBase.BuildSpeedfield);
+            await Load(DataBase.LoadData).ConfigureAwait(true);
         } catch (Exception e) {
             _loadingError = true;
 
@@ -48,14 +48,13 @@ public class Loader : MonoBehaviour {
             LoadingDetailsText.text += Messager.GetMessages();
 	}
 
-    private async Task Load(Action<string> action) {
+    private async Task Load(Action action) {
         //Run main script       
-        string dataBasePath = Path.Combine(Application.streamingAssetsPath, "SpeedField.mat");    //TODO move
-        await Task.Run(() => action(dataBasePath));         //TODO handle errors        
+        await Task.Run(action).ConfigureAwait(true);     
 
 		//Load scene
 		MethodExtensions.LogWithElapsedTime("Load main scene");
-		await this.StartCoroutineAsync(PreLoadScene());
+		await this.StartCoroutineAsync(PreLoadScene()).ConfigureAwait(true);
         MethodExtensions.LogWithElapsedTime("");
 
 		//Done

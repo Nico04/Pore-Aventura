@@ -85,7 +85,7 @@ public class GridMaps : MonoBehaviour {
 		}
 
 		//Create texture
-		int exitResolution = (int)(TrajectoriesManager.Instance.Size.y / distanceMin);
+		int exitResolution = (int)(DataBase.DataSpaceSize.y / distanceMin);
 		var exitTexture = GetNewTexture(exitResolution);
 
 		//Fill with default color
@@ -110,7 +110,7 @@ public class GridMaps : MonoBehaviour {
 	//Build deux maps with the Soap Bubble / Vonoroï like algo 
 	private void BuildGridMapsSoapBubble() {
 		var trajectories = TrajectoriesManager.Instance.Trajectories;
-		float textureSpacing = TrajectoriesManager.Instance.Size.y / TextureResolution;
+		float textureSpacing = DataBase.DataSpaceSize.y / TextureResolution;
 
 		//--- Entry Map ---
 		//Build a list of PointColor of the trajectories that intersect the plan, in the texture coordinates
