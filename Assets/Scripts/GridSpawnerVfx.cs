@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Experimental.VFX;
 
@@ -39,10 +40,9 @@ public class GridSpawnerVfx : MonoBehaviour {
 
 
 		_textureHolder = new List<Texture2D>();
-		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
+		foreach (var trajectory in TrajectoriesManager.Instance.GetInjectionGridTrajectories(CancellationToken.None).Result) {
 			var particlesSpawner = Instantiate(ParticlesSpawner, trajectory.StartPoint, Quaternion.identity, transform);
 			var visualEffect = particlesSpawner.GetComponent<VisualEffect>();
-
 
 			/** RGBA32 method
 			 * Uniquement 256 valeurs par axe => Pas assez précis

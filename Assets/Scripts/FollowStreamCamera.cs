@@ -9,7 +9,7 @@ public class FollowStreamCamera : MonoBehaviour {
             doCenterCamera = true;
 
             //Build trajectory
-            Trajectory = TrajectoriesManager.Instance.BuildTrajectory(transform.position);
+            Trajectory = TrajectoriesManager.Instance.BuildTrajectory(transform.position, Trajectory.Types.Manual);
             _currentTrajectoryIndex = 0;
 
 			//Toggle enable state of the camera's collider to make sure it follows the stream particules

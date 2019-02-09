@@ -2,6 +2,7 @@
 
 public class PauseManager : MonoBehaviour {
     public GameObject PauseUi;
+    public GameObject ToBeHidden;
 
     public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
 
@@ -38,14 +39,11 @@ public class PauseManager : MonoBehaviour {
             if (_isPaused == value) return;
 
             _isPaused = value;
-            _instance.PauseUi?.SetActive(_isPaused);
+            _instance.PauseUi.SetActive(_isPaused);
             Cursor.lockState = _isPaused ? CursorLockMode.None : CursorLockMode.Locked;           //Warning : escape key doesn't work well in the editor (disable the screen lock)
 
-			/** When Time.timeScale == 0, FixedUpdate() will not be called and physics will be stops.
-             * In our project, will very little physics, it is not usefull to change that. 
-             *
-			Time.timeScale = _isPaused ? 0 : 1;       
-			*/
+			//Hide some UI
+            _instance.ToBeHidden.SetActive(!_isPaused);
 
 			//Handle Vfx
 			_instance.TracerInjectionGridGpuBuilder.Pause(_isPaused);

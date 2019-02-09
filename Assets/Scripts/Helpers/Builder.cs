@@ -10,9 +10,31 @@ public class Builder : MonoBehaviour {
 
 	public string Name = "Builder";
 
-	public enum Types { None, Cpu, Gpu }
-	[NonSerialized]
-	public Types Type = Types.None;
+	public enum Types { Cpu, Gpu }
+	public Types Type = Types.Cpu;
+
+	public bool IsVisible {
+		get {
+			if (Type == Types.Cpu)
+				return gameObject.activeInHierarchy;
+			else if (Type == Types.Gpu)
+				return GetComponent<Renderer>().enabled;	//Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
+			else
+				return false;
+		}
+		set {
+			if (!value)
+				CancelBuild();
+
+			if (Type == Types.Cpu)
+				gameObject.SetActive(value);
+			else if (Type == Types.Gpu)
+				GetComponent<Renderer>().enabled = value;			//Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
+
+			if (VisibilityControler.Instance != null)
+				VisibilityControler.Instance.AskBuildersStatusUpdate();
+		}
+	}
 
 	private bool _isBuilding = false;
 	public bool IsBuilding {
@@ -25,22 +47,6 @@ public class Builder : MonoBehaviour {
 				VisibilityControler.Instance.AskBuildersStatusUpdate();
 		}
 	}
-
-	private bool _isVisible = true;
-	public bool IsVisible {
-		get => _isVisible;
-		set {
-			bool hasChanged = _isVisible != value;
-			_isVisible = value;
-
-			SetVisibility(_isVisible);
-
-			if (hasChanged && VisibilityControler.Instance != null)
-				VisibilityControler.Instance.AskBuildersStatusUpdate();
-		}
-	}
-
-	protected virtual void SetVisibility(bool isVisible) => throw new MethodAccessException();
 
 	private bool _isDirty = true;
 	public void AskRebuild() {
@@ -61,8 +67,6 @@ public class Builder : MonoBehaviour {
 		return Task.CompletedTask;
 	}
 
-	
-	
 	protected virtual void Start() {
 		if (!_buildersIsSorted) {
 			Builders.Sort((b1, b2) => string.Compare(b1.Name, b2.Name, StringComparison.InvariantCulture));

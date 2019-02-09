@@ -25,8 +25,12 @@ public class StreamlinesBuilder : Builder {
 		for (int i = 0; i < transform.childCount; i++) {
 			Destroy(transform.GetChild(i).gameObject);
 		}
-		
-		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
+
+		//Get trajectories
+		var trajectories = await TrajectoriesManager.Instance.GetInjectionGridTrajectories(cancellationToken).ConfigureAwait(true);
+
+		//Build lines
+		foreach (var trajectory in trajectories) {
 			cancellationToken.ThrowIfCancellationRequested();
 
 			//Create a new line renderer
@@ -75,12 +79,8 @@ public class StreamlinesBuilder : Builder {
 		}
 	}
 
-	protected override void SetVisibility(bool isVisible) {
-		BasicDispatcher.RunOnMainThread(() =>
-			gameObject.SetActive(!gameObject.activeInHierarchy)        //SetActive must be called in the Update() and NOT in OnGUI()
-		);
-	}
-
+//Old method
+#if false
 	private async void BuildStreamlines() {
 		//Delete all existing streamlines
 		await AsyncDispatcher.RunOnMainThread(() => {
@@ -196,6 +196,7 @@ public class StreamlinesBuilder : Builder {
 			//lineRenderer.SetPropertyBlock(_materialPropertyBlock);
 		}
 	}
+#endif
 
 	/** Method using constant distance step : not very physically logical.
 	private const float StreamLineIncDistance = 0.01f;
@@ -313,7 +314,7 @@ public class StreamlinesBuilder : Builder {
 		return gradient;
 	}
 #endif
-	#endregion
+#endregion
 
 #region Vectrosity
 #if false

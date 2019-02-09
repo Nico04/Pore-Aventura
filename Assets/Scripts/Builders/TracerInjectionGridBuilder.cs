@@ -15,7 +15,7 @@ public class TracerInjectionGridBuilder : Builder {
 	}
 	
 	// Update is called once per frame
-	protected override void Update () {
+	protected override async void Update () {
 		base.Update();
 
 		if (PauseManager.IsPaused)
@@ -26,7 +26,7 @@ public class TracerInjectionGridBuilder : Builder {
 			return;
 
 		//Spawn loop
-		SpawnAll(true);
+		await SpawnAll(true, CancellationToken.None).ConfigureAwait(false);
 
 		//Reset timer
 		_elapsedSinceLastSpawn.Restart();
@@ -34,41 +34,31 @@ public class TracerInjectionGridBuilder : Builder {
 
 	protected override async Task Build(CancellationToken cancellationToken) {
 		cancellationToken.ThrowIfCancellationRequested();
-		await Task.Run(action: SetTrajectoriesColor, cancellationToken: cancellationToken).ConfigureAwait(true);
-
-		cancellationToken.ThrowIfCancellationRequested();
-		BuildStaticGrid();
+		await BuildStaticGrid(cancellationToken).ConfigureAwait(false);
 	}
 
-	protected override void SetVisibility(bool isVisible) {
-		BasicDispatcher.RunOnMainThread(() =>
-			gameObject.SetActive(!gameObject.activeInHierarchy)        //SetActive must be called in the Update() and NOT in OnGUI()
-		);
-	}
+	private readonly List<GameObject> _staticParticles = new List<GameObject>();
+	private async Task BuildStaticGrid(CancellationToken cancellationToken) => await SpawnAll(false, cancellationToken).ConfigureAwait(false);
 
-	private List<GameObject> staticParticles = new List<GameObject>();
-	private void BuildStaticGrid() => SpawnAll(false);
-
+	/** Old method
 	public static void SetTrajectoriesColor() {
 		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
-			/**
-			 trajectory.Color = Color.HSVToRGB(
-				trajectory.StartPoint.y / TrajectoriesManager.Instance.Size, 
-				1f, 
-				MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
-			);*/
+			// trajectory.Color = Color.HSVToRGB(
+			//	trajectory.StartPoint.y / TrajectoriesManager.Instance.Size, 
+			//	1f, 
+			//	MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
+			//);
 			
 			var Ymin = 0f;
 			var Ymax = DataBase.DataSpaceSize.y;
 			var N = 5;		//Color repetition cycle number
 
-			/**
-			trajectory.Color = Color.HSVToRGB(
-				((trajectory.StartPoint.y - Ymin) % ((Ymax - Ymin) / N)) / (Ymax - Ymin),
-				(trajectory.StartPoint.y - Ymin) / (Ymax - Ymin),
-				MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
-			);
-			*/
+			//trajectory.Color = Color.HSVToRGB(
+			//	((trajectory.StartPoint.y - Ymin) % ((Ymax - Ymin) / N)) / (Ymax - Ymin),
+			//	(trajectory.StartPoint.y - Ymin) / (Ymax - Ymin),
+			//	MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
+			//);
+			
 
 			var Zmin = 0f;
 			var Zmax = DataBase.DataSpaceSize.z;
@@ -83,17 +73,19 @@ public class TracerInjectionGridBuilder : Builder {
 				1 + Math.Min(0f, paramV * (Zc - trajectory.StartPoint.z) / (Zmax - Zmin))
 			);
 		}
-	}
+	}*/
 
 	private const float MinColorValue = 0.4f;
-	private void SpawnAll(bool movingParticles) {
+	private async Task SpawnAll(bool movingParticles, CancellationToken cancellationToken) {
 		if (TrajectoriesManager.Instance.Resolution == 0)
 			return;
 
+		cancellationToken.ThrowIfCancellationRequested();
+
 		//if it's static particles, removes previous ones
 		if (!movingParticles) {
-			staticParticles.ForEach(Destroy);
-			staticParticles.Clear();
+			_staticParticles.ForEach(Destroy);
+			_staticParticles.Clear();
 		}
 
 		//Spawn loop
@@ -111,7 +103,9 @@ public class TracerInjectionGridBuilder : Builder {
 			}
 		}*/
 
-		foreach (var trajectory in TrajectoriesManager.Instance.Trajectories) {
+		var trajectories = await TrajectoriesManager.Instance.GetInjectionGridTrajectories(CancellationToken.None).ConfigureAwait(true);
+		foreach (var trajectory in trajectories) {
+			cancellationToken.ThrowIfCancellationRequested();
 			/**
 			//Create new instance a particle
 			var particle = Instantiate(SpawnObject, trajectory.StartPoint, Quaternion.identity, transform);
@@ -129,7 +123,7 @@ public class TracerInjectionGridBuilder : Builder {
 			//static particle case
 			if (!movingParticles) {
 				particle.GetComponent<FollowStream>().enabled = false;
-				staticParticles.Add(particle);
+				_staticParticles.Add(particle);
 			}
 		}
 	}

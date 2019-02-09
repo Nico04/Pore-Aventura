@@ -235,6 +235,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: 3.a. Advective Tracers - Injection Grid
+  Type: 0
   SpawnObject: {fileID: 1509666878255790, guid: 6ab2a660c7708cb4f82ad7650ae441f0,
     type: 3}
 --- !u!1 &120910222
@@ -508,6 +509,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PauseUi: {fileID: 1801415565}
+  ToBeHidden: {fileID: 674946696}
   TracerInjectionGridGpuBuilder: {fileID: 1342039024382583376}
 --- !u!114 &120910233
 MonoBehaviour:
@@ -814,7 +816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: 1.    Solid Boundaries (Microstructure)
-  CsvFile: {fileID: 4900000, guid: e49a6d45b1f3ea1469bc7a6ff991a9a0, type: 3}
+  Type: 0
   ObjectToPopulate: {fileID: 1509666878255790, guid: 6d1774812846f844eb247736c9c67bc4,
     type: 3}
 --- !u!4 &575314556
@@ -1417,6 +1419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: 2.    Advective Tracers - Manual Injection
+  Type: 0
   SpawnObject: {fileID: 1509666878255790, guid: 6ab2a660c7708cb4f82ad7650ae441f0,
     type: 3}
   Spawner: {fileID: 120910222}
@@ -1465,6 +1468,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc9f3b991997dfa4aaeff941e76ae87f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Name: 5.   Grid Maps
+  Type: 0
   Entry: {fileID: 1407298894}
   Exit: {fileID: 773621824}
 --- !u!1 &1220775797
@@ -1669,7 +1674,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ac9c2eea5636e343be8a43bd779a81a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Name: 4.a. Streamlines [GPU]
+  Name: 4.b. Streamlines
+  Type: 1
 --- !u!1 &1394221632
 GameObject:
   m_ObjectHideFlags: 0
@@ -1728,6 +1734,7 @@ MonoBehaviour:
   TracerInjectionGridGpuBuilder: {fileID: 1342039024382583376}
   StreamlinesBuilder: {fileID: 1527903982}
   StreamlinesGpuBuilder: {fileID: 1235011590}
+  GridMapsBuilder: {fileID: 1139853169}
   StructureTransparentMaterial: {fileID: 2100000, guid: 528199da7d0eceb4da0f9a96325f8409,
     type: 2}
   BuildersStatusText: {fileID: 674946697}
@@ -1977,6 +1984,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: 4.a. Streamlines
+  Type: 0
   Line: {fileID: 1271257127858676, guid: 36921e2d27699754f854fa37270d90f9, type: 3}
 --- !u!4 &1527903983
 Transform:
@@ -2080,8 +2088,9 @@ MonoBehaviour:
     - Tracers Visibility <i>(default : <color=#ffffffff>c</color>)</i>\r\n - Tracers
     GPU Visibility <i>(default : <color=#ffffffff>Alt + c</color>)</i>\r\n - Streamlines
     Visibility <i>(default : <color=#ffffffff>v</color>)</i>\r\n - Streamlines GPU
-    Visibility <i>(default : <color=#ffffffff>Alt + v</color>)</i>\r\n - Pause/Resume
-    <i>(default : <color=#ffffffff>Escape</color>)</i></color>"
+    Visibility <i>(default : <color=#ffffffff>Alt + v</color>)</i>\r\n - Grid Maps
+    Visibility <i>(default : <color=#ffffffff>b</color>)</i>\r\n - Pause/Resume <i>(default
+    : <color=#ffffffff>Escape</color>)</i></color>"
 --- !u!222 &1573287552
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2557,4 +2566,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03415a77667f610448441e240425067b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Name: 3.b. Advective Tracers - Injection Grid [GPU]
+  Name: 3.b. Advective Tracers - Injection Grid
+  Type: 1

@@ -14,12 +14,10 @@ public class TracerInjectionGridGpuBuilder : Builder {
 	//public int VFXRefreshFrequency = 10;
 
 	private VisualEffect _visualEffect;
-	private Renderer _renderer;
 
 	protected override void Start() {
 		base.Start();
 		_visualEffect = GetComponent<VisualEffect>();
-		_renderer = GetComponent<Renderer>();
 	}
 
 	protected override void Update() {
@@ -38,12 +36,7 @@ public class TracerInjectionGridGpuBuilder : Builder {
 	private Texture2D _colorsTexture;    //We need to keep a ref to the texture because SetTexture only make a binding.
 
 	protected override async Task Build(CancellationToken cancellationToken) {
-		cancellationToken.ThrowIfCancellationRequested();
-		await Task.Run(action: TracerInjectionGridBuilder.SetTrajectoriesColor, cancellationToken: cancellationToken).ConfigureAwait(true);
-
-		cancellationToken.ThrowIfCancellationRequested();
-
-		var trajectories = TrajectoriesManager.Instance.Trajectories;
+		var trajectories = await TrajectoriesManager.Instance.GetInjectionGridTrajectories(cancellationToken).ConfigureAwait(true);
 		if (trajectories.Length == 0) {
 			_visualEffect.Reinit();
 			return;
@@ -173,11 +166,6 @@ public class TracerInjectionGridGpuBuilder : Builder {
 		_visualEffect.SetUInt("TrajectoriesCount", Convert.ToUInt32(trajectories.Length));
 		_visualEffect.SetTexture("Trajectories", _texture);
 	}*/
-
-
-	protected override void SetVisibility(bool isVisible) {
-		_renderer.enabled = !_renderer.enabled;     //Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
-	}
 
 	//Scale an input value that goes between 0 and max, to be in range 0 to 1.
 	private float ScaleToRange01(float value, float max) => value / max;

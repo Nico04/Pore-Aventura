@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using UnityEngine;
-using Hdf5DotNetTools;
 
 public static class DataBase {
 	private static double[,] _solidBoundaries; // Solid Boundaries Array [i, position(x,y,z)]. Example : [0, 1] will return the y coordinate of the first solid boundary.
@@ -15,11 +14,11 @@ public static class DataBase {
         var path = Path.Combine(Application.streamingAssetsPath, "Data.h5");
 
         //Open file
-        var fileId = Hdf5.OpenFile(path, true);
+        var fileId = HdfReader.OpenFile(path, true);
 
         //Get datasets
-        _solidBoundaries = (double[,]) Hdf5.ReadDatasetToArray<double>(fileId, "/SolidBoundaries");
-        _velocityField = (double[,,,]) Hdf5.ReadDatasetToArray<double>(fileId, "/SpeedField");
+        _solidBoundaries = (double[,])HdfReader.ReadDataSetToArray<double>(fileId, "/SolidBoundaries");
+        _velocityField = (double[,,,])HdfReader.ReadDataSetToArray<double>(fileId, "/SpeedField");
 
         //Set space size
         DataSpaceSize = new Vector3(_velocityField.GetUpperBound(1), _velocityField.GetUpperBound(2), _velocityField.GetUpperBound(3)) * VelocityFieldSpaceFactor;

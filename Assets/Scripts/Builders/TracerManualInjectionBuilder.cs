@@ -58,11 +58,8 @@ public class TracerManualInjectionBuilder : Builder {
 		});*/
 
 		//Create new trajectory
-	    var trajectory = TrajectoriesManager.Instance.BuildTrajectory(position);
+	    var trajectory = TrajectoriesManager.Instance.BuildTrajectory(position, Trajectory.Types.Manual, Color.HSVToRGB(Random.value, 1f, 1f));
 	    if (trajectory == null) return;
-
-		//Set color
-	    trajectory.Color = Color.HSVToRGB(Random.value, 1f, 1f);
 
 		//Add to spawner list
 		_spawners.Add(trajectory);
@@ -70,7 +67,7 @@ public class TracerManualInjectionBuilder : Builder {
 
 	private void CreateNewParticle(Vector3 position) {
 		//Create new trajectory
-		var trajectory = TrajectoriesManager.Instance.BuildTrajectory(position);
+		var trajectory = TrajectoriesManager.Instance.BuildTrajectory(position, Trajectory.Types.Manual);
 		if (trajectory == null) return;
 
 		CreateNewParticle(trajectory);

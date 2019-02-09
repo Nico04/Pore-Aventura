@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class VisibilityControler : MonoBehaviour {
@@ -11,7 +9,8 @@ public class VisibilityControler : MonoBehaviour {
 	public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
 	public StreamlinesBuilder StreamlinesBuilder;
 	public StreamlinesGpuBuilder StreamlinesGpuBuilder;
-	
+	public GridMapsBuilder GridMapsBuilder;
+
 	public Material StructureTransparentMaterial;
 	private Material _structureOpaqueMaterial;
 
@@ -32,6 +31,7 @@ public class VisibilityControler : MonoBehaviour {
 	private bool _solidBoundariesVisibilityKeyIsDown = false;
 	private bool _tracersVisibilityKeyIsDown = false;
 	private bool _streamlinesVisibilityKeyIsDown = false;
+	private bool _gridMapsVisibilityKeyIsDown = false;
 	private void OnGUI() {
 		if (!_solidBoundariesVisibilityKeyIsDown && Input.GetButtonDown("SolidBoundariesVisibility")) {
 			_solidBoundariesVisibilityKeyIsDown = true;
@@ -68,9 +68,18 @@ public class VisibilityControler : MonoBehaviour {
 		} else if (_streamlinesVisibilityKeyIsDown && Input.GetButtonUp("StreamlinesVisibility")) {
 			_streamlinesVisibilityKeyIsDown = false;
 		}
+
+		if (!_gridMapsVisibilityKeyIsDown && Input.GetButtonDown("GridMapsVisibility")) {
+			_gridMapsVisibilityKeyIsDown = true;
+
+			GridMapsBuilder.IsVisible = !GridMapsBuilder.IsVisible;
+		} else if (_gridMapsVisibilityKeyIsDown && Input.GetButtonUp("GridMapsVisibility")) {
+			_gridMapsVisibilityKeyIsDown = false;
+		}
 	}
 
 	private bool _isStructureTransparent = false;
+
 	private void ToggleSolidBoundariesTransparency() {
 		//Get default opaque Material reference
 		if (!_isStructureTransparent && _structureOpaqueMaterial == null)
@@ -108,8 +117,8 @@ public class VisibilityControler : MonoBehaviour {
 				text += $" <Building...>";
 
 			//Third part
-			if (builder.Type != Builder.Types.None)
-				text += $" ({builder.Type.ToString()})";
+			if (builder.Type == Builder.Types.Gpu)
+				text += " [GPU]";
 		}
 
 		BuildersStatusText.text = text;

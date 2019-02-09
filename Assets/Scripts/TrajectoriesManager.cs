@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,17 +19,12 @@ public class TrajectoriesManager : MonoBehaviour {
 	public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
 	public StreamlinesGpuBuilder StreamlinesGpuBuilder;
 
-
-	private Trajectory[] _trajectories;
-	public Trajectory[] Trajectories => _trajectories ?? (_trajectories = BuildTrajectories());
-
-
 	private float? _trajectoriesMaxDistance;
-	public float TrajectoriesDistanceMax => _trajectoriesMaxDistance ?? (_trajectoriesMaxDistance = Trajectories.Max(t => t.Distances.Max())).GetValueOrDefault();
+	public float TrajectoriesDistanceMax => _trajectoriesMaxDistance ?? (_trajectoriesMaxDistance = _trajectories.Max(t => t.Distances.Max())).GetValueOrDefault();
 
 
 	private float? _trajectoriesAverageDistance;
-	public float TrajectoriesAverageDistance => _trajectoriesAverageDistance ?? (_trajectoriesAverageDistance = Trajectories.Average(t => t.Distances.Average())).GetValueOrDefault();
+	public float TrajectoriesAverageDistance => _trajectoriesAverageDistance ?? (_trajectoriesAverageDistance = _trajectories.Average(t => t.Distances.Average())).GetValueOrDefault();
 
 	public float SpawnRate => 1f / (SpawnDelay / 1000f);        //In particle per second
 
@@ -46,14 +43,19 @@ public class TrajectoriesManager : MonoBehaviour {
 		UpdateVariableText();
 	}
 
-	private Trajectory[] BuildTrajectories() {
+	private Trajectory[] _trajectories;
+	public async Task<Trajectory[]> GetInjectionGridTrajectories(CancellationToken cancellationToken) {
+		return _trajectories ?? (_trajectories = await Task.Run(() => BuildInjectionGridTrajectories(), cancellationToken).ConfigureAwait(false));
+	}
+
+	private Trajectory[] BuildInjectionGridTrajectories() {
 		var trajectories = new List<Trajectory>();
 
 		//Loop through all injection point
 		for (float y = Spacing / 2; y <= DataBase.DataSpaceSize.y; y += Spacing) {
 			for (float z = Spacing / 2; z <= DataBase.DataSpaceSize.z; z += Spacing) {
 				//Build one trajectory
-				var trajectory = BuildTrajectory(new Vector3(0.1f, y, z));
+				var trajectory = BuildTrajectory(new Vector3(0.1f, y, z), Trajectory.Types.InjectionGrid);
 
 				//Add it to master array if it is not null
 				if (trajectory != null)
@@ -72,7 +74,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 	//private System.Diagnostics.Stopwatch _debugStopwatch;
 
-	public Trajectory BuildTrajectory(Vector3 startPosition) {
+	public Trajectory BuildTrajectory(Vector3 startPosition, Trajectory.Types type, Color? color = null) {
 		//Init list
 		var trajectory = new List<Vector3> { startPosition };
 		var currentPoint = trajectory[0];
@@ -106,7 +108,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 		//file?.Close();
 
-		return trajectory.Count > 1 ? new Trajectory(trajectory.ToArray()) : null;
+		return trajectory.Count > 1 ? new Trajectory(trajectory.ToArray(), type, color) : null;
 	}
 
 	private void ComputeTrajectoriesStats(Trajectory[] trajectories) {
@@ -135,13 +137,13 @@ public class TrajectoriesManager : MonoBehaviour {
 
 	public Vector3 GetNextTrajectoryPosition(Vector3[] trajectory, ref int currentPositionIndex) => trajectory.ElementAtOrDefault(++currentPositionIndex);
 
-	private StepRules _spawnDelayStepRules = new StepRules(new List<StepRange> {
+	private readonly StepRules _spawnDelayStepRules = new StepRules(new List<StepRange> {
 		new StepRange(0, 500, 100),
 		new StepRange(500, 2000, 250),
 		new StepRange(2000, int.MaxValue, 1000)
 	});
 
-	private StepRules _resolutionStepRules = new StepRules(new List<StepRange> {
+	private readonly StepRules _resolutionStepRules = new StepRules(new List<StepRange> {
 		new StepRange(0, 50, 5),
 		new StepRange(50, int.MaxValue, 10)
 	});
@@ -152,7 +154,7 @@ public class TrajectoriesManager : MonoBehaviour {
 		bool hasChanged = false;
 		if (!_spawnDelayKeyIsDown && Input.GetButtonDown("SpawnDelay")) {
 			_spawnDelayKeyIsDown = true;
-			SpawnDelay = _spawnDelayStepRules.StepValue(SpawnDelay, Input.GetAxis("SpawnDelay") > 0); //Math.Max(SpawnDelay + Mathf.RoundToInt(Input.GetAxis("SpawnDelay")) * 250, 0);
+			SpawnDelay = _spawnDelayStepRules.StepValue(SpawnDelay, Input.GetAxis("SpawnDelay") > 0);
 
 			//Update SpawnDelay for vfx
 			GridSpawnerVfx.AskUpdateSpawnDelay();
@@ -168,7 +170,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 		if (!_spawnResolutionKeyIsDown && Input.GetButtonDown("SpawnResolution")) {
 			_spawnResolutionKeyIsDown = true;
-			Resolution = _resolutionStepRules.StepValue(Resolution, Input.GetAxis("SpawnResolution") > 0); //Math.Max(Resolution + Mathf.RoundToInt(Input.GetAxis("SpawnResolution")) * 5, 0);
+			Resolution = _resolutionStepRules.StepValue(Resolution, Input.GetAxis("SpawnResolution") > 0);
 
 			//Rebuild Trajectories 
 			AskRebuildTrajectories();
@@ -207,18 +209,62 @@ public class Trajectory {
 	private float[] _distances;
 	public float[] Distances => _distances ?? (_distances = BuildDistances());      //OPTI remove if streamLine only use Vfx method that doesn't need this.
 
+	public enum Types { InjectionGrid, Manual }
+	public Types Type; 
+
 	private Color? _color;
 	public Color Color {
-		get => _color ?? Color.HSVToRGB(0.6f, 1f, 1f);
+		get {
+			if (_color == null) {
+				if (Type == Types.Manual) {
+					_color = Color.HSVToRGB(0.6f, 1f, 1f);
+				} else if (Type == Types.InjectionGrid) {
+					/**
+					 trajectory.Color = Color.HSVToRGB(
+						trajectory.StartPoint.y / TrajectoriesManager.Instance.Size, 
+						1f, 
+						MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
+					);*/
+
+					var Ymin = 0f;
+					var Ymax = DataBase.DataSpaceSize.y;
+					var N = 5;      //Color repetition cycle number
+
+					/**
+					trajectory.Color = Color.HSVToRGB(
+						((trajectory.StartPoint.y - Ymin) % ((Ymax - Ymin) / N)) / (Ymax - Ymin),
+						(trajectory.StartPoint.y - Ymin) / (Ymax - Ymin),
+						MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
+					);
+					*/
+
+					var Zmin = 0f;
+					var Zmax = DataBase.DataSpaceSize.z;
+					var paramS = 0.25f;
+					var paramV = 1.25f;
+					var Yc = (Ymax + Ymin) / 2;
+					var Zc = (Zmax + Zmin) / 2;
+					N = 1;
+					_color = Color.HSVToRGB(
+						((StartPoint.y - Yc) % ((Ymax - Ymin) / N)) * N / (Ymax - Ymin),
+						Math.Min(1f, (1 - paramS) * (StartPoint.z - Zmin) / (Zc - Zmin) + paramS),
+						1 + Math.Min(0f, paramV * (Zc - StartPoint.z) / (Zmax - Zmin))
+					);
+				}
+			}
+
+			return _color.GetValueOrDefault();
+		}
 		set {
 			if (_color == value)
 				return;
 
 			_color = value;
-			_particleMaterial = null;
+			//_particleMaterial = null;
 		}
 	}
 
+	/** usefull ?
 	private Material _particleMaterial;
 	public Material GetParticleMaterial(Material baseMaterial) {
 		if (_color == null)
@@ -229,10 +275,12 @@ public class Trajectory {
 
 		baseMaterial.color = Color;
 		return _particleMaterial = baseMaterial;
-	}
+	}*/
 
-	public Trajectory(Vector3[] points) {
+	public Trajectory(Vector3[] points, Types type, Color? color = null) {
 		Points = points;
+		Type = type;
+		_color = color;
 	}
 
 	private float[] BuildDistances() {
@@ -245,19 +293,19 @@ public class Trajectory {
 }
 
 public class StepRules {
-	public List<StepRange> Rules;
+	private readonly List<StepRange> _rules;
+	private readonly int _rangeMin;
+	private readonly int _rangeMax;
 
-	private int _rangeMin;
-	private int _rangeMax;
 	public StepRules(List<StepRange> rules) {
-		Rules = rules;
-		_rangeMin = Rules.Min(r => r.Range.Start);
-		_rangeMax = Rules.Max(r => r.Range.End);
+		_rules = rules;
+		_rangeMin = _rules.Min(r => r.Range.Start);
+		_rangeMax = _rules.Max(r => r.Range.End);
 	}
 
 	public int StepValue(int currentValue, bool stepUp) {
 		var selectFunc = new Func<StepRange, bool>(s => s.Range.Start <= currentValue && currentValue <= s.Range.End);
-		int step = (stepUp ? Rules.Last(selectFunc) : Rules.First(selectFunc)).Step;
+		int step = (stepUp ? _rules.Last(selectFunc) : _rules.First(selectFunc)).Step;
 		return Clamp(currentValue + step * (stepUp ? 1 : -1));
 	}
 
