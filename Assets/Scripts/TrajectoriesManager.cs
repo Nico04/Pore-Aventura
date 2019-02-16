@@ -246,7 +246,7 @@ public class Trajectory {
 					var Zc = (Zmax + Zmin) / 2;
 					N = 1;
 					_color = Color.HSVToRGB(
-						((StartPoint.y - Yc) % ((Ymax - Ymin) / N)) * N / (Ymax - Ymin),
+						(Math.Abs(StartPoint.y - Yc) % ((Ymax - Ymin) / N)) * N / (Ymax - Ymin),
 						Math.Min(1f, (1 - paramS) * (StartPoint.z - Zmin) / (Zc - Zmin) + paramS),
 						1 + Math.Min(0f, paramV * (Zc - StartPoint.z) / (Zmax - Zmin))
 					);

@@ -2,10 +2,10 @@
 using UnityEngine;
 
 public static class DataBase {
-	private static double[,] _solidBoundaries; // Solid Boundaries Array [i, position(x,y,z)]. Example : [0, 1] will return the y coordinate of the first solid boundary.
-    private static double[,,,] _velocityField; // Speed Field  Array [velocity(x,y,z), x, y, z]. Example : [2, 5, 5, 5] will return the z coordinate of the velocity at the point (5, 5, 5)
+	private static float[,] _solidBoundaries; // Solid Boundaries Array [i, position(x,y,z)]. Example : [0, 1] will return the y coordinate of the first solid boundary.
+    private static float[,,,] _velocityField; // Speed Field  Array [x, y, z, velocity(x,y,z)]. Example : [5, 5, 5, 2] will return the z coordinate of the velocity at the point (5, 5, 5)
 
-    private const float VelocityFieldSpaceFactor = 0.050438596491228f; //facteur d'espace (pour passage des unités de l'espace à un indice du tableau speedField)
+	private const float VelocityFieldSpaceFactor = 0.050438596491228f; //facteur d'espace (pour passage des unités de l'espace à un indice du tableau speedField)
 
     public static Vector3 DataSpaceSize;
 
@@ -17,11 +17,11 @@ public static class DataBase {
         var fileId = HdfReader.OpenFile(path, true);
 
         //Get datasets
-        _solidBoundaries = (double[,])HdfReader.ReadDataSetToArray<double>(fileId, "/SolidBoundaries");
-        _velocityField = (double[,,,])HdfReader.ReadDataSetToArray<double>(fileId, "/SpeedField");
+        _solidBoundaries = (float[,])HdfReader.ReadDataSetToArray<float>(fileId, "/SolidBoundaries");
+        _velocityField = (float[,,,])HdfReader.ReadDataSetToArray<float>(fileId, "/VelocityField");
 
         //Set space size
-        DataSpaceSize = new Vector3(_velocityField.GetUpperBound(1), _velocityField.GetUpperBound(2), _velocityField.GetUpperBound(3)) * VelocityFieldSpaceFactor;
+        DataSpaceSize = new Vector3(_velocityField.GetUpperBound(0), _velocityField.GetUpperBound(1), _velocityField.GetUpperBound(2)) * VelocityFieldSpaceFactor;
 
         //TODO DEBUG ONLY
         DataSpaceSize = new Vector3(18f, 10f, 10f);
@@ -73,12 +73,12 @@ public static class DataBase {
             lowerPoint.x <= 0 ||
             lowerPoint.y <= 0 ||
             lowerPoint.z <= 0 ||
-            upperPoint.x > _velocityField.GetUpperBound(1) ||
-            upperPoint.y > _velocityField.GetUpperBound(2) ||
-            upperPoint.z > _velocityField.GetUpperBound(3) ||
-            lowerPoint.x > _velocityField.GetUpperBound(1) ||
-            lowerPoint.y > _velocityField.GetUpperBound(2) ||
-            lowerPoint.z > _velocityField.GetUpperBound(3))
+            upperPoint.x > _velocityField.GetUpperBound(0) ||
+            upperPoint.y > _velocityField.GetUpperBound(1) ||
+            upperPoint.z > _velocityField.GetUpperBound(2) ||
+            lowerPoint.x > _velocityField.GetUpperBound(0) ||
+            lowerPoint.y > _velocityField.GetUpperBound(1) ||
+            lowerPoint.z > _velocityField.GetUpperBound(2))
             return Vector3.zero;
 
         //Si les deux points sont les mêmes
@@ -92,14 +92,14 @@ public static class DataBase {
         var interpolatedSpeed = new double[3];
         for (int i = 0; i < 3; i++) {
             var speedComponent =
-                _velocityField[i, upperPoint.x, upperPoint.y, upperPoint.z] * (1 - ratio.x) * (1 - ratio.y) * (1 - ratio.z) +
-                _velocityField[i, lowerPoint.x, upperPoint.y, upperPoint.z] * ratio.x * (1 - ratio.y) * (1 - ratio.z) +
-                _velocityField[i, upperPoint.x, lowerPoint.y, upperPoint.z] * (1 - ratio.x) * ratio.y * (1 - ratio.z) +
-                _velocityField[i, lowerPoint.x, lowerPoint.y, upperPoint.z] * ratio.x * ratio.y * (1 - ratio.z) +
-                _velocityField[i, upperPoint.x, upperPoint.y, lowerPoint.z] * (1 - ratio.x) * (1 - ratio.y) * ratio.z +
-                _velocityField[i, lowerPoint.x, upperPoint.y, lowerPoint.z] * ratio.x * (1 - ratio.y) * ratio.z +
-                _velocityField[i, upperPoint.x, lowerPoint.y, lowerPoint.z] * (1 - ratio.x) * ratio.y * ratio.z +
-                _velocityField[i, lowerPoint.x, lowerPoint.y, lowerPoint.z] * ratio.x * ratio.y * ratio.z;
+                _velocityField[upperPoint.x, upperPoint.y, upperPoint.z, i] * (1 - ratio.x) * (1 - ratio.y) * (1 - ratio.z) +
+                _velocityField[lowerPoint.x, upperPoint.y, upperPoint.z, i] * ratio.x * (1 - ratio.y) * (1 - ratio.z) +
+                _velocityField[upperPoint.x, lowerPoint.y, upperPoint.z, i] * (1 - ratio.x) * ratio.y * (1 - ratio.z) +
+                _velocityField[lowerPoint.x, lowerPoint.y, upperPoint.z, i] * ratio.x * ratio.y * (1 - ratio.z) +
+                _velocityField[upperPoint.x, upperPoint.y, lowerPoint.z, i] * (1 - ratio.x) * (1 - ratio.y) * ratio.z +
+                _velocityField[lowerPoint.x, upperPoint.y, lowerPoint.z, i] * ratio.x * (1 - ratio.y) * ratio.z +
+                _velocityField[upperPoint.x, lowerPoint.y, lowerPoint.z, i] * (1 - ratio.x) * ratio.y * ratio.z +
+                _velocityField[lowerPoint.x, lowerPoint.y, lowerPoint.z, i] * ratio.x * ratio.y * ratio.z;
 
             interpolatedSpeed[i] = speedComponent;
         }
@@ -108,7 +108,7 @@ public static class DataBase {
     }
     
     private static Vector3 GetVelocityAtPoint(int x, int y, int z) {
-        return new Vector3((float) _velocityField[0, x, y, z], (float) _velocityField[0, x, y, z], (float) _velocityField[0, x, y, z]);
+        return new Vector3((float) _velocityField[x, y, z, 0], (float) _velocityField[x, y, z, 1], (float) _velocityField[x, y, z, 2]);
     }
     
 	public static bool IsSpeedTooLow(Vector3 speed) => speed.magnitude <= 0.0001f;
