@@ -87,7 +87,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 		//Get speed at currentPoint
 		Vector3 currentSpeed;
-		while (!DataBase.IsSpeedTooLow(currentSpeed = DataBase.GetInterpolatedVelocityAtPosition(currentPoint))) {
+		while (!DataBase.IsVelocityTooLow(currentSpeed = DataBase.GetInterpolatedVelocityAtPosition(currentPoint))) {
 			//TODO use IsSpeedTooLow everywhere
 			//Move to next point by going into the speed direction by a defined distance
 			currentPoint += currentSpeed * TrajectoriesStep;
@@ -144,57 +144,66 @@ public class TrajectoriesManager : MonoBehaviour {
 	});
 
 	private readonly StepRules _resolutionStepRules = new StepRules(new List<StepRange> {
-		new StepRange(0, 50, 5),
+		new StepRange(5, 50, 5),
 		new StepRange(50, int.MaxValue, 10)
 	});
 
 	private bool _spawnDelayKeyIsDown = false;
 	private bool _spawnResolutionKeyIsDown = false;
 	private void OnGUI() {  //Called several times per frame
+		//Exit if it is not the right event type
+		if (Event.current.type != EventType.KeyDown && Event.current.type != EventType.KeyUp)
+			return;
+
 		bool hasChanged = false;
 		if (!_spawnDelayKeyIsDown && Input.GetButtonDown("SpawnDelay")) {
 			_spawnDelayKeyIsDown = true;
+			var oldDelay = SpawnDelay;
 			SpawnDelay = _spawnDelayStepRules.StepValue(SpawnDelay, Input.GetAxis("SpawnDelay") > 0);
 
-			//Update SpawnDelay for vfx
-			GridSpawnerVfx.AskUpdateSpawnDelay();
+			if (oldDelay != SpawnDelay) {
+				//Update SpawnDelay for vfx
+				GridSpawnerVfx.AskUpdateSpawnDelay();
 
-			//Update SpawnDelay for vfx batch
-			TracerInjectionGridGpuBuilder.AskUpdateSpawnDelay();
-			TracerInjectionGridGpuBuilder.AskRebuild();
+				//Update SpawnDelay for vfx batch
+				TracerInjectionGridGpuBuilder.AskUpdateSpawnDelay();
+				TracerInjectionGridGpuBuilder.AskRebuild();
 
-			hasChanged = true;
+				hasChanged = true;
+			}
 		} else if (_spawnDelayKeyIsDown && Input.GetButtonUp("SpawnDelay")) {
 			_spawnDelayKeyIsDown = false;
 		}
 
 		if (!_spawnResolutionKeyIsDown && Input.GetButtonDown("SpawnResolution")) {
 			_spawnResolutionKeyIsDown = true;
+			var oldResolution = Resolution;
 			Resolution = _resolutionStepRules.StepValue(Resolution, Input.GetAxis("SpawnResolution") > 0);
 
-			//Rebuild Trajectories 
-			AskRebuildTrajectories();
+			if (Resolution != oldResolution) {
+				//Rebuild Trajectories 
+				AskRebuildTrajectories();
 
-			//Rebuild builders
-			BuildersToUpdateOnResolutionChange.ForEach(b => b.AskRebuild());
+				//Rebuild builders
+				BuildersToUpdateOnResolutionChange.ForEach(b => b.AskRebuild());
 
-			//Re-build spawners
-			GridSpawnerVfx.AskRebuild();
+				//Re-build spawners
+				GridSpawnerVfx.AskRebuild();
 
-			//Re-build spawner
-			TracerInjectionGridGpuBuilder.AskRebuild();
+				//Re-build spawner
+				TracerInjectionGridGpuBuilder.AskRebuild();
 
-			//Re-build streamlines Vfx
-			StreamlinesGpuBuilder.AskRebuild();
+				//Re-build streamlines Vfx
+				StreamlinesGpuBuilder.AskRebuild();
 
-			hasChanged = true;
+				hasChanged = true;
+			}
 		} else if (_spawnResolutionKeyIsDown && Input.GetButtonUp("SpawnResolution")) {
 			_spawnResolutionKeyIsDown = false;
 		}
 
-		if (hasChanged) {
+		if (hasChanged)
 			UpdateVariableText();
-		}
 	}
 
 	private void UpdateVariableText() {
@@ -246,7 +255,7 @@ public class Trajectory {
 					var Zc = (Zmax + Zmin) / 2;
 					N = 1;
 					_color = Color.HSVToRGB(
-						(Math.Abs(StartPoint.y - Yc) % ((Ymax - Ymin) / N)) * N / (Ymax - Ymin),
+						Tools.TrueModulo(StartPoint.y - Yc, (Ymax - Ymin) / N) * N / (Ymax - Ymin),
 						Math.Min(1f, (1 - paramS) * (StartPoint.z - Zmin) / (Zc - Zmin) + paramS),
 						1 + Math.Min(0f, paramV * (Zc - StartPoint.z) / (Zmax - Zmin))
 					);

@@ -66,6 +66,7 @@ public class StreamlinesBuilder : Builder {
 			
 
 			//Apply colors
+			if (lineRenderer == null) return;	//Can happen if gameObject is disabled during the Task.Run
 			var texture = new Texture2D(textureSize, 1);
 			texture.SetPixels32(colors);
 			texture.Apply();

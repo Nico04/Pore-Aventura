@@ -7,6 +7,15 @@ using UnityEngine;
 public class GridMapsBuilder : Builder {
 	public GameObject Entry;
 	public GameObject Exit;
+	public GameObject SolidBoundariesHolder;
+
+	private SolidBoundariesBuilder _solidBoundariesBuilder;
+
+	protected override void Start() {
+		base.Start();
+
+		_solidBoundariesBuilder = SolidBoundariesHolder.GetComponent<SolidBoundariesBuilder>();
+	}
 
 	protected override async Task Build(CancellationToken cancellationToken) {
 		//BuildGridMaps();
@@ -104,75 +113,99 @@ public class GridMapsBuilder : Builder {
 
 		//--- Entry Map ---
 		//Build a list of PointColor of the trajectories that intersect the plan, in the texture coordinates
-		var entryPoints = trajectories.Select(t => new PointColor2 {
-			Position = new Vector2(
-				CoordinateToPixelIndex(t.StartPoint.z, textureSpacing),
-				CoordinateToPixelIndex(t.StartPoint.y, textureSpacing)),
-			Color = t.Color
-		}).ToList();
+		List<PointColor2> entryPoints = null;
+		await Task.Run(() => {
+			entryPoints = trajectories.Select(t => new PointColor2 {
+				Position = new Vector2(
+					CoordinateToPixelIndex(t.StartPoint.z, textureSpacing),
+					CoordinateToPixelIndex(t.StartPoint.y, textureSpacing)),
+				Color = t.Color
+			}).ToList();
+		}, cancellationToken).ConfigureAwait(true);
+		
 
 		//Build texture
-		BuildGridMapSoapBubble(entryPoints, Entry);
+		await BuildGridMapSoapBubble(entryPoints, textureSpacing, Entry, cancellationToken).ConfigureAwait(true);
 
 		//--- Exit Map ---
 		//Build a list of PointColor of the trajectories that intersect the plan, in the texture coordinates
 		List<PointColor2> exitPoints = new List<PointColor2>();
+		var exitPositionX = Exit.transform.position.x;
 
-		foreach (var trajectory in trajectories) {
-			//Find the first point which has a x < to the exit.x, starting from the end
-			Vector3 point = Vector3.zero;
-			int currentPointIndex = trajectory.Points.Length - 1;
-			while (currentPointIndex >= 0 && trajectory.Points[currentPointIndex].x >= Exit.transform.position.x) {
-				point = trajectory.Points[currentPointIndex];
-				currentPointIndex--;
+		await Task.Run(() => {
+			foreach (var trajectory in trajectories) {
+				//Find the first point which has a x < to the exit.x, starting from the end
+				Vector3 point = Vector3.zero;
+				int currentPointIndex = trajectory.Points.Length - 1;
+				while (currentPointIndex >= 0 && trajectory.Points[currentPointIndex].x >= exitPositionX) {
+					point = trajectory.Points[currentPointIndex];
+					currentPointIndex--;
+				}
+
+				//Skip this trajectory if it's too short
+				if (point == Vector3.zero)
+					continue;
+
+				exitPoints.Add(new PointColor2 {
+					Position = new Vector2(
+						CoordinateToPixelIndex(point.z, textureSpacing),
+						CoordinateToPixelIndex(point.y, textureSpacing)),
+					Color = trajectory.Color
+				});
 			}
-
-			//Skip this trajectory if it's too short
-			if (point == Vector3.zero)
-				continue;
-
-			exitPoints.Add(new PointColor2 {
-				Position = new Vector2(
-					CoordinateToPixelIndex(point.z, textureSpacing),
-					CoordinateToPixelIndex(point.y, textureSpacing)),
-				Color = trajectory.Color
-			});
-		}
+		}, cancellationToken).ConfigureAwait(true);
 
 		//Build texture
-		BuildGridMapSoapBubble(exitPoints, Exit);
+		await BuildGridMapSoapBubble(exitPoints, textureSpacing, Exit, cancellationToken).ConfigureAwait(false);
 	}
 
 	//Build a Map with the Soap Bubble / Vonoroï like algo 
-	private void BuildGridMapSoapBubble(List<PointColor2> points, GameObject textureHolder) {
-		const int pointRadius = 10;
+	private async Task BuildGridMapSoapBubble(List<PointColor2> points, float textureSpacing, GameObject textureHolder, CancellationToken cancellationToken) {
+		cancellationToken.ThrowIfCancellationRequested();
+
+		var textureHolderPositionX = textureHolder.transform.position.x;
+		const int pointRadius = 5;
 
 		//New texture
 		var texture = GetNewTexture(TextureResolution);
 		var textureArray = texture.GetPixels32();
+		var textureWidth = texture.width;
 
 		//Set pixels
-		for (int p = 0; p < textureArray.Length; p++) {
-			//Convert into coordinates
-			var currentPoint = new Vector2(p % texture.width, (int)(p / texture.width));
+		await Task.Run(() => {
+			for (int p = 0; p < textureArray.Length; p++) {
+				//Convert into coordinates
+				var currentPoint = new Vector2(p % textureWidth, (int)(p / textureWidth));
 
-			//TODO if this pixel is INTO a microstructure sphere, set it to white and continue;
-
-
-			//Find the closest point
-			PointColor2 closestPoint = null;
-			float distanceMin = float.MaxValue;
-			foreach (var point in points) {
-				float distance;
-				if ((distance = Vector2.Distance(currentPoint, point.Position)) < distanceMin) {
-					distanceMin = distance;
-					closestPoint = point;
+				//if this pixel is INTO a microstructure sphere, set it to white and continue;
+				bool isInsideSolidBounds = false;
+				var currentPositionInSpace = new Vector3(textureHolderPositionX, currentPoint.y * textureSpacing, currentPoint.x * textureSpacing);
+				foreach (var position in _solidBoundariesBuilder.Positions) {
+					if (Vector3.Distance(currentPositionInSpace, position) < 1f) {
+						textureArray[p] = Color.white;
+						isInsideSolidBounds = true;
+						break;
+					}
 				}
-			}
+				if (isInsideSolidBounds)
+					continue;
+				
 
-			//Apply color to pixel
-			textureArray[p] = distanceMin <= pointRadius ? closestPoint.Color : Color.black;
-		}
+				//Find the closest point
+				PointColor2 closestPoint = null;
+				float distanceMin = float.MaxValue;
+				foreach (var point in points) {
+					float distance;
+					if ((distance = Vector2.Distance(currentPoint, point.Position)) < distanceMin) {
+						distanceMin = distance;
+						closestPoint = point;
+					}
+				}
+
+				//Apply color to pixel
+				textureArray[p] = distanceMin <= pointRadius ? closestPoint.Color : Color.black;
+			}
+		}, cancellationToken).ConfigureAwait(true);
 
 		//Apply
 		texture.SetPixels32(textureArray);

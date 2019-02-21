@@ -1,6 +1,7 @@
 # Pore Aventura
 ![Logo](/Assets/Images/logo.png)
 
+## Description
 Pore Aventura is a *3D velocity field explorer*, designed for academic research purposes. It aims at visualizing and investigating the kinematic properties of a steady 3D velocity field, which can contain solid stationary boundaries, like for instance in a porous media.
 
 Among its features, Pore Aventura allows :
@@ -12,3 +13,10 @@ Among its features, Pore Aventura allows :
 
 
 Pore Aventura was initially developed to investigate dispersion and mixing in porous media, by providing a tool to explore the velocity intermittency, the streamlines tortuosity and the dispersion properties of an experimentally measured 3D velocity field obtained in a porous medium made out of a random stack of monodisperse rigid spherical beads.
+
+## Installation
+1. Download the latest Pore Aventura release.
+2. Extract downloaded archive.
+3. Download the scientific data (data.h5) from the release page (or use a custom one).
+4. Copy the the data.h5 file in the StreamingAssets folder of the extracted folder.
+5. Enjoy !

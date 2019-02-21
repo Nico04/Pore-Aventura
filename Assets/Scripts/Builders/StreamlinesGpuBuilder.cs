@@ -17,12 +17,13 @@ public class StreamlinesGpuBuilder : Builder {
 	private Texture2D _texture;    //We need to keep a ref to the texture because SetTexture only make a binding.
 	protected override async Task Build(CancellationToken cancellationToken) {
 		//Get trajectories
-		var trajectories = await TrajectoriesManager.Instance.GetInjectionGridTrajectories(cancellationToken);
+		var trajectories = await TrajectoriesManager.Instance.GetInjectionGridTrajectories(cancellationToken).ConfigureAwait(true);
 
 		//Get texture size
 		//Unity max texture width or height is 16k : cannot use a mono-line texture.
 		int size = (int)Math.Ceiling(Math.Sqrt(trajectories.Sum(t => Math.Ceiling(t.Points.Length / SampleValue))));
 		_texture = new Texture2D(size, size, TextureFormat.RGBAFloat, false) {
+			filterMode = FilterMode.Point,
 			wrapMode = TextureWrapMode.Clamp		//Important for vfx index access
 		}; 
 
@@ -44,6 +45,6 @@ public class StreamlinesGpuBuilder : Builder {
 		_visualEffect.SetFloat("DistanceColorMax", 3 * TrajectoriesManager.Instance.TrajectoriesAverageDistance);		//color scale commonly use (3 * average) as maximum
 		_visualEffect.SetTexture("Trajectories", _texture);
 
-		Debug.Log($"BuildStreamLines|size={size}|");
+		//Debug.Log($"BuildStreamLines|size={size}|");
 	}
 }

@@ -15,7 +15,11 @@ public class PauseManager : MonoBehaviour {
     private bool _keyIsDown = false;
 
     private void OnGUI() {  //Called several times per frame
-        if (!_keyIsDown && Input.GetButtonDown("Pause")) {      
+        //Exit if it is not the right event type
+        if (Event.current.type != EventType.KeyDown && Event.current.type != EventType.KeyUp)
+            return;
+
+		if (!_keyIsDown && Input.GetButtonDown("Pause")) {      
             IsPaused = !IsPaused;
             _keyIsDown = true;
         }

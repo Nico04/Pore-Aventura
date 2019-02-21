@@ -5,6 +5,7 @@ public class VisibilityControler : MonoBehaviour {
 	public static VisibilityControler Instance;
 
 	public SolidBoundariesBuilder SolidBoundariesBuilder;
+	public TracerManualInjectionBuilder TracerManualInjectionBuilder;
 	public TracerInjectionGridBuilder TracerInjectionGridBuilder;
 	public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
 	public StreamlinesBuilder StreamlinesBuilder;
@@ -33,6 +34,10 @@ public class VisibilityControler : MonoBehaviour {
 	private bool _streamlinesVisibilityKeyIsDown = false;
 	private bool _gridMapsVisibilityKeyIsDown = false;
 	private void OnGUI() {
+		//Exit if it is not the right event type
+		if (Event.current.type != EventType.KeyDown && Event.current.type != EventType.KeyUp)
+			return;
+
 		if (!_solidBoundariesVisibilityKeyIsDown && Input.GetButtonDown("SolidBoundariesVisibility")) {
 			_solidBoundariesVisibilityKeyIsDown = true;
 
@@ -52,8 +57,10 @@ public class VisibilityControler : MonoBehaviour {
 
 			if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
 				TracerInjectionGridGpuBuilder.IsVisible = !TracerInjectionGridGpuBuilder.IsVisible;
-			else
+			else {
 				TracerInjectionGridBuilder.IsVisible = !TracerInjectionGridBuilder.IsVisible;
+				TracerManualInjectionBuilder.IsVisible = !TracerManualInjectionBuilder.IsVisible;
+			}
 		} else if (_tracersVisibilityKeyIsDown && Input.GetButtonUp("TracersVisibility")) {
 			_tracersVisibilityKeyIsDown = false;
 		}

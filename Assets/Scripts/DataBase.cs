@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class DataBase {
 	private static float[,] _solidBoundaries; // Solid Boundaries Array [i, position(x,y,z)]. Example : [0, 1] will return the y coordinate of the first solid boundary.
-    private static float[,,,] _velocityField; // Speed Field  Array [x, y, z, velocity(x,y,z)]. Example : [5, 5, 5, 2] will return the z coordinate of the velocity at the point (5, 5, 5)
+    private static float[,,,] _velocityField; // Velocity Field  Array [x, y, z, velocity(x,y,z)]. Example : [5, 5, 5, 2] will return the z coordinate of the velocity at the point (5, 5, 5)
 
 	private const float VelocityFieldSpaceFactor = 0.050438596491228f; //facteur d'espace (pour passage des unités de l'espace à un indice du tableau speedField)
 
@@ -13,6 +13,10 @@ public static class DataBase {
     public static void LoadData() {
         var path = Path.Combine(Application.streamingAssetsPath, "Data.h5");
 
+        //Check if file exists
+        if (!File.Exists(path))
+            throw new IOException("Couldn't find " + path);
+        
         //Open file
         var fileId = HdfReader.OpenFile(path, true);
 
@@ -46,11 +50,9 @@ public static class DataBase {
         return solidBoundaries;
     }
 
-    //Interpole la vitesse au point p de l'espace donné
-    //p : point où l’interpolation est souhaitée
-    //speedField : champ des vitesse. Tableau de Vector3 à 3 dimensions dont les indices sont les coordonnées spatiales (X, Y, Z) au facteur près 
-    //spaceFactor : facteur d'espace (pour passage des unités de l'espace à un indice du tableau speedField)
-    public static Vector3 GetInterpolatedVelocityAtPosition(Vector3 position) {
+	//Interpole la vitesse au point p de l'espace donné
+	//point : point où l’interpolation est souhaitée
+	public static Vector3 GetInterpolatedVelocityAtPosition(Vector3 position) {
         if (_velocityField == null) {
             Debug.LogError($"{nameof(_velocityField)} must be initiated");
             return Vector3.zero;
@@ -89,7 +91,7 @@ public static class DataBase {
         var ratio = pUnit - upperPoint;
 
         //3. Calculer la vitesse au point voulu
-        var interpolatedSpeed = new double[3];
+        var interpolatedVelocity = new double[3];
         for (int i = 0; i < 3; i++) {
             var speedComponent =
                 _velocityField[upperPoint.x, upperPoint.y, upperPoint.z, i] * (1 - ratio.x) * (1 - ratio.y) * (1 - ratio.z) +
@@ -101,17 +103,17 @@ public static class DataBase {
                 _velocityField[upperPoint.x, lowerPoint.y, lowerPoint.z, i] * (1 - ratio.x) * ratio.y * ratio.z +
                 _velocityField[lowerPoint.x, lowerPoint.y, lowerPoint.z, i] * ratio.x * ratio.y * ratio.z;
 
-            interpolatedSpeed[i] = speedComponent;
+            interpolatedVelocity[i] = speedComponent;
         }
 
-        return new Vector3((float)interpolatedSpeed[0], (float)interpolatedSpeed[1], (float)interpolatedSpeed[2]);
+        return new Vector3((float)interpolatedVelocity[0], (float)interpolatedVelocity[1], (float)interpolatedVelocity[2]);
     }
     
     private static Vector3 GetVelocityAtPoint(int x, int y, int z) {
         return new Vector3((float) _velocityField[x, y, z, 0], (float) _velocityField[x, y, z, 1], (float) _velocityField[x, y, z, 2]);
     }
     
-	public static bool IsSpeedTooLow(Vector3 speed) => speed.magnitude <= 0.0001f;
+	public static bool IsVelocityTooLow(Vector3 speed) => speed.magnitude <= 0.0001f;
 
 	/** Old 
     //Build the speedField Array from the extracted matlab file directly ("monoVarSingle" : 1 Matlab variable de type Single[3,189,175,357] (mais attention à la transposition faite par la librairie))

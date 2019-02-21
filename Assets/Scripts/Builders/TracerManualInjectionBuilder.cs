@@ -29,8 +29,6 @@ public class TracerManualInjectionBuilder : Builder {
     private readonly List<Trajectory> _spawners = new List<Trajectory>();
     private readonly Stopwatch _elapsedSinceLastSpawn = new Stopwatch();
 	protected override void Update() {
-		base.Update();
-
         if (PauseManager.IsPaused)
             return;
 

@@ -27,7 +27,7 @@ public class Builder : MonoBehaviour {
 				CancelBuild();
 
 			if (Type == Types.Cpu)
-				gameObject.SetActive(value);
+				BasicDispatcher.RunOnMainThread(() => gameObject.SetActive(value)); //SetActive must be called from Update and NOT from OnGUI
 			else if (Type == Types.Gpu)
 				GetComponent<Renderer>().enabled = value;			//Disabling the renderer pauses the vfx too (Disabling the gameObject containing the vfx reset the vfx, and that's not what we want).
 
@@ -58,6 +58,10 @@ public class Builder : MonoBehaviour {
 	public void CancelBuild() => _buildCancellationToken?.Cancel();
 
 	public Builder() {
+		//Disable automatic behaviour for StreamlinesGpuBuilder so it doesn't appears is the App, because it is not ready for production
+		if (this is StreamlinesGpuBuilder)
+			return;
+
 		Builders.Add(this);
 		_buildersIsSorted = false;
 	}

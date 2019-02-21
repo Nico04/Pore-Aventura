@@ -92,7 +92,7 @@ public class TracerInjectionGridGpuBuilder : Builder {
 
 				int pixelIndex = t + tracersSum + (p % tracerSpacing) * tracersCount;
 				positionsTextureData[pixelIndex] = point;
-				colorsTextureData[pixelIndex] = Color.HSVToRGB(traj.Color.r, traj.Color.g, traj.Color.b);
+				colorsTextureData[pixelIndex] = traj.Color;
 			}
 		}
 

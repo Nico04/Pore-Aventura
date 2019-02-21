@@ -6,10 +6,12 @@ using UnityEngine;
 public class SolidBoundariesBuilder : Builder {
     public GameObject ObjectToPopulate;
 
-    protected override async Task Build (CancellationToken cancellationToken) {
-		var positions = await Task.Run(() => DataBase.GetSolidBoundaries(), cancellationToken).ConfigureAwait(true);
+    public Vector3[] Positions;
 
-		foreach (Vector3 position in positions) {
+    protected override async Task Build (CancellationToken cancellationToken) {
+	    Positions = await Task.Run(() => DataBase.GetSolidBoundaries(), cancellationToken).ConfigureAwait(true);
+
+		foreach (Vector3 position in Positions) {
 	        Instantiate(ObjectToPopulate, position, Quaternion.identity, transform);
         }
 	}
