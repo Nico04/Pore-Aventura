@@ -55,7 +55,12 @@ public class Builder : MonoBehaviour {
 	}
 
 	private CancellationTokenSource _buildCancellationToken;
-	public void CancelBuild() => _buildCancellationToken?.Cancel();
+	public void CancelBuild() {
+		if (_buildCancellationToken == null) return;
+
+		_buildCancellationToken.Cancel();
+		_isDirty = true;
+	}
 
 	public Builder() {
 		//Disable automatic behaviour for StreamlinesGpuBuilder so it doesn't appears is the App, because it is not ready for production
@@ -67,7 +72,7 @@ public class Builder : MonoBehaviour {
 	}
 
 	protected virtual Task Build(CancellationToken cancellationToken) {
-		Debug.Log($"{GetType().Name}.Build : Empty Build Method");
+		Debug.LogWarning($"{GetType().Name}.Build : Empty Build Method");
 		return Task.CompletedTask;
 	}
 

@@ -27,7 +27,7 @@ public class Stats : MonoBehaviour {
 	}
 
 	private void UpdateStats() {
-		_text.text = ToKMB(Holders.Sum(h => h.transform.childCount) + GridSpawnerVfx.GetTotalParticlesCount() + TracerInjectionGridGpuBuilder.GetTotalParticlesCount()) + " tracers";
+		_text.text = ToKMB(Holders.Sum(h => h.activeInHierarchy ? h.transform.childCount : 0) + (TracerInjectionGridGpuBuilder.IsVisible ? TracerInjectionGridGpuBuilder.GetTotalParticlesCount() : 0)) + /*GridSpawnerVfx.GetTotalParticlesCount() + */" tracers";
 		_stopwatch.Restart();
 	}
 

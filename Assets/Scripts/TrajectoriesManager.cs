@@ -15,9 +15,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 	public Text ShowVariableText;
 	public List<Builder> BuildersToUpdateOnResolutionChange = new List<Builder>();
-	public GridSpawnerVfx GridSpawnerVfx;
 	public TracerInjectionGridGpuBuilder TracerInjectionGridGpuBuilder;
-	public StreamlinesGpuBuilder StreamlinesGpuBuilder;
 
 	private float? _trajectoriesMaxDistance;
 	public float TrajectoriesDistanceMax => _trajectoriesMaxDistance ?? (_trajectoriesMaxDistance = _trajectories.Max(t => t.Distances.Max())).GetValueOrDefault();
@@ -44,11 +42,27 @@ public class TrajectoriesManager : MonoBehaviour {
 	}
 
 	private Trajectory[] _trajectories;
+	private Task<Trajectory[]> _currentBuildTask;
 	public async Task<Trajectory[]> GetInjectionGridTrajectories(CancellationToken cancellationToken) {
-		return _trajectories ?? (_trajectories = await Task.Run(() => BuildInjectionGridTrajectories(), cancellationToken).ConfigureAwait(false));
+		//Just return the array if it is already built
+		if (_trajectories != null)
+			return _trajectories;
+
+		try {
+			//If no build is currently running, start the building process
+			if (_currentBuildTask == null) {
+				_currentBuildTask = Task.Run(() => BuildInjectionGridTrajectories(), cancellationToken);
+			}
+
+			//Wait the process to finish
+			return (_trajectories = await _currentBuildTask.ConfigureAwait(false));
+		} finally {
+			_currentBuildTask = null;
+		}
 	}
 
 	private Trajectory[] BuildInjectionGridTrajectories() {
+		Debug.Log("Start BuildInjectionGridTrajectories");
 		var trajectories = new List<Trajectory>();
 
 		//Loop through all injection point
@@ -79,12 +93,6 @@ public class TrajectoriesManager : MonoBehaviour {
 		var trajectory = new List<Vector3> { startPosition };
 		var currentPoint = trajectory[0];
 
-
-		//_debugStopwatch?.Stop();
-		//_debugStopwatch = System.Diagnostics.Stopwatch.StartNew();
-		//var maxLog = 0;
-		//System.IO.StreamWriter file = null;
-
 		//Get speed at currentPoint
 		Vector3 currentSpeed;
 		while (!DataBase.IsVelocityTooLow(currentSpeed = DataBase.GetInterpolatedVelocityAtPosition(currentPoint))) {
@@ -94,19 +102,7 @@ public class TrajectoriesManager : MonoBehaviour {
 
 			//Add point to list
 			trajectory.Add(currentPoint);
-
-
-			//if (_debugStopwatch.Elapsed.Seconds > 10 && maxLog++ < 1000) {
-			//	Debug.Log($"currentPoint = ({currentPoint.x:0.0000}, {currentPoint.y:0.0000}, {currentPoint.z:0.0000})");
-
-			//	if (file == null )
-			//		file = new System.IO.StreamWriter(@"C:\Users\Public\temp\log.txt");
-			//	file.WriteLine($"{currentPoint.x:0.0000}|{currentPoint.y:0.0000}|{currentPoint.z:0.0000}||{currentSpeed.x:0.0000}|{currentSpeed.y:0.0000}|{currentSpeed.z:0.0000}|{currentSpeed.magnitude:0.0000}");
-			//}
 		}
-
-
-		//file?.Close();
 
 		return trajectory.Count > 1 ? new Trajectory(trajectory.ToArray(), type, color) : null;
 	}
@@ -163,10 +159,9 @@ public class TrajectoriesManager : MonoBehaviour {
 
 			if (oldDelay != SpawnDelay) {
 				//Update SpawnDelay for vfx
-				GridSpawnerVfx.AskUpdateSpawnDelay();
+				//GridSpawnerVfx.AskUpdateSpawnDelay();
 
-				//Update SpawnDelay for vfx batch
-				TracerInjectionGridGpuBuilder.AskUpdateSpawnDelay();
+				//TracerInjectionGridGpuBuilder need to be rebuilt when SpawnDelay is changed
 				TracerInjectionGridGpuBuilder.AskRebuild();
 
 				hasChanged = true;
@@ -186,15 +181,6 @@ public class TrajectoriesManager : MonoBehaviour {
 
 				//Rebuild builders
 				BuildersToUpdateOnResolutionChange.ForEach(b => b.AskRebuild());
-
-				//Re-build spawners
-				GridSpawnerVfx.AskRebuild();
-
-				//Re-build spawner
-				TracerInjectionGridGpuBuilder.AskRebuild();
-
-				//Re-build streamlines Vfx
-				StreamlinesGpuBuilder.AskRebuild();
 
 				hasChanged = true;
 			}
@@ -228,36 +214,28 @@ public class Trajectory {
 				if (Type == Types.Manual) {
 					_color = Color.HSVToRGB(0.6f, 1f, 1f);
 				} else if (Type == Types.InjectionGrid) {
-					/**
+					/** Basic color algo
 					 trajectory.Color = Color.HSVToRGB(
 						trajectory.StartPoint.y / TrajectoriesManager.Instance.Size, 
 						1f, 
 						MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
 					);*/
 
-					var Ymin = 0f;
-					var Ymax = DataBase.DataSpaceSize.y;
-					var N = 5;      //Color repetition cycle number
+					/** Advanced color algo by Mathieu Souzy */
+					const float yMin = 0f;
+					var yMax = DataBase.DataSpaceSize.y;
+					const int N = 1;            //Color repetition cycle number. C'est le paramètre qui permet de choisir si on veut explorer N fois la gamme des H, pour éviter de faire des sauts de couleurs bizarre.
+					const float zMin = 0f;
+					var zMax = DataBase.DataSpaceSize.z;
+					const float paramS = 0.25f;     //S permet d'explorer l'échelle de couleur de blanc à la couleur correspondant au H que t'as choisi
+					const float paramV = 1.25f;     //V permet d'explorer l'échelle de couleur de noir à la couleur correspondant au H que t'as choisi
+					var yCenter = (yMax + yMin) / 2;
+					var zCenter = (zMax + zMin) / 2;
 
-					/**
-					trajectory.Color = Color.HSVToRGB(
-						((trajectory.StartPoint.y - Ymin) % ((Ymax - Ymin) / N)) / (Ymax - Ymin),
-						(trajectory.StartPoint.y - Ymin) / (Ymax - Ymin),
-						MinColorValue + trajectory.StartPoint.z / TrajectoriesManager.Instance.Size * (1f - MinColorValue)
-					);
-					*/
-
-					var Zmin = 0f;
-					var Zmax = DataBase.DataSpaceSize.z;
-					var paramS = 0.25f;
-					var paramV = 1.25f;
-					var Yc = (Ymax + Ymin) / 2;
-					var Zc = (Zmax + Zmin) / 2;
-					N = 1;
 					_color = Color.HSVToRGB(
-						Tools.TrueModulo(StartPoint.y - Yc, (Ymax - Ymin) / N) * N / (Ymax - Ymin),
-						Math.Min(1f, (1 - paramS) * (StartPoint.z - Zmin) / (Zc - Zmin) + paramS),
-						1 + Math.Min(0f, paramV * (Zc - StartPoint.z) / (Zmax - Zmin))
+						Tools.TrueModulo(StartPoint.y - yCenter, (yMax - yMin) / N) * N / (yMax - yMin),
+						Math.Min(1f, (1 - paramS) * (StartPoint.z - zMin) / (zCenter - zMin) + paramS),     //la formule pour S consiste a varier S linéairement sur la gamme [minS;1] sur [0;zMax/2], puis pour z>zMax/2, S=1
+						1 + Math.Min(0f, paramV * (zCenter - StartPoint.z) / (zMax - zMin))                 //la formule pour V consiste à avoir V = 1 sur[0; zMax / 2], puis varier V linéairement sur la gamme[1; minV]  pour[zMax / 2; zMax].
 					);
 				}
 			}

@@ -867,7 +867,7 @@ RectTransform:
   m_Children:
   - {fileID: 42845688}
   m_Father: {fileID: 1801415569}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1150,7 +1150,7 @@ RectTransform:
   - {fileID: 674946699}
   - {fileID: 1877167794}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1297,7 +1297,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &929066802
+--- !u!1 &1058495148
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1305,77 +1305,112 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 929066803}
-  - component: {fileID: 929066805}
-  - component: {fileID: 929066804}
+  - component: {fileID: 1058495149}
+  - component: {fileID: 1058495151}
+  - component: {fileID: 1058495150}
+  - component: {fileID: 1058495152}
+  - component: {fileID: 1058495153}
   m_Layer: 5
-  m_Name: Controls 2
+  m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &929066803
+--- !u!224 &1058495149
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 929066802}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_GameObject: {fileID: 1058495148}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1573287550}
   m_Father: {fileID: 1801415569}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 10, y: 30}
-  m_SizeDelta: {x: 400, y: 20}
+  m_AnchoredPosition: {x: 5, y: 30}
+  m_SizeDelta: {x: 435, y: 487}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &929066804
+--- !u!114 &1058495150
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 929066802}
+  m_GameObject: {fileID: 1058495148}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.52205884, g: 0.52205884, b: 0.52205884, a: 1}
+  m_Color: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 0.95686275}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 6
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: (Mapping can be changed at startup in the input section)
---- !u!222 &929066805
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+--- !u!222 &1058495151
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 929066802}
+  m_GameObject: {fileID: 1058495148}
   m_CullTransparentMesh: 0
+--- !u!114 &1058495152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1058495148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1741964061, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 2
+  m_VerticalFit: 2
+--- !u!114 &1058495153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1058495148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1297475563, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 10
+    m_Right: 10
+    m_Top: 10
+    m_Bottom: 10
+  m_ChildAlignment: 6
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
 --- !u!1 &1101071970
 GameObject:
   m_ObjectHideFlags: 0
@@ -1781,9 +1816,7 @@ MonoBehaviour:
   - {fileID: 1527903982}
   - {fileID: 1235011590}
   - {fileID: 1139853169}
-  GridSpawnerVfx: {fileID: 1824203157}
   TracerInjectionGridGpuBuilder: {fileID: 1342039024382583376}
-  StreamlinesGpuBuilder: {fileID: 1235011590}
 --- !u!1 &1407298894
 GameObject:
   m_ObjectHideFlags: 0
@@ -2015,6 +2048,7 @@ GameObject:
   - component: {fileID: 1573287550}
   - component: {fileID: 1573287552}
   - component: {fileID: 1573287551}
+  - component: {fileID: 1573287553}
   m_Layer: 5
   m_Name: Controls
   m_TagString: Untagged
@@ -2033,13 +2067,13 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1801415569}
-  m_RootOrder: 3
+  m_Father: {fileID: 1058495149}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 10, y: 50}
-  m_SizeDelta: {x: 425.8, y: 196.1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 10, y: -477}
+  m_SizeDelta: {x: 415, y: 467}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1573287551
 MonoBehaviour:
@@ -2092,9 +2126,10 @@ MonoBehaviour:
     - Tracers Visibility <i>(default : <color=#ffffffff>c</color>)</i>\r\n - Tracers
     GPU Visibility <i>(default : <color=#ffffffff>Alt + c</color>)</i>\r\n - Streamlines
     Visibility <i>(default : <color=#ffffffff>v</color>)</i>\r\n - Streamlines GPU
-    Visibility <i>(default : <color=#ffffffff>Alt + v</color>)</i>\r\n - Grid Maps
-    Visibility <i>(default : <color=#ffffffff>b</color>)</i>\r\n - Pause/Resume <i>(default
-    : <color=#ffffffff>Escape</color>)</i></color>"
+    Visibility <i>(default : <color=#ffffffff>Alt + v</color>)</i>\r <color=#ffffffff>[SOON]</color>\n
+    - Grid Maps Visibility <i>(default : <color=#ffffffff>b</color>)</i>\r\n - Pause/Resume
+    <i>(default : <color=#ffffffff>Escape</color>)</i></color>\n\n<color=#858585><size=14>(Mapping
+    can be changed at startup in the input section)</size></color>"
 --- !u!222 &1573287552
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2103,6 +2138,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1573287549}
   m_CullTransparentMesh: 0
+--- !u!114 &1573287553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573287549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1741964061, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 2
+  m_VerticalFit: 2
 --- !u!1 &1801415565
 GameObject:
   m_ObjectHideFlags: 0
@@ -2196,11 +2245,10 @@ RectTransform:
   - {fileID: 1220775798}
   - {fileID: 472513071}
   - {fileID: 1906727790}
-  - {fileID: 1573287550}
-  - {fileID: 929066803}
+  - {fileID: 1058495149}
   - {fileID: 589069076}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
