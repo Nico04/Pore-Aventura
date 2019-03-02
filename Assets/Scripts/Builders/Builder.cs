@@ -63,10 +63,6 @@ public class Builder : MonoBehaviour {
 	}
 
 	public Builder() {
-		//Disable automatic behaviour for StreamlinesGpuBuilder so it doesn't appears is the App, because it is not ready for production
-		if (this is StreamlinesGpuBuilder)
-			return;
-
 		Builders.Add(this);
 		_buildersIsSorted = false;
 	}

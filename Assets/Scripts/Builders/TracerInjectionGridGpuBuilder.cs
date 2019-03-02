@@ -48,43 +48,41 @@ public class TracerInjectionGridGpuBuilder : Builder {
 		var positionsTextureData = _positionsTexture.GetRawTextureData<Vector4>();
 		var colorsTextureData = _colorsTexture.GetPixels32();
 
-		//Apply value to VFX
-		_visualEffect.Reinit();     //Reset vfx otherwise all particules are mixed up between trajectories (colors are mixed)
-		_visualEffect.SetUInt("TracersCount", Convert.ToUInt32(tracersCount));
-		_visualEffect.SetUInt("PositionsCount", Convert.ToUInt32(positionsCount));
-		_visualEffect.SetUInt("AnimationSpeed", Convert.ToUInt32(AnimationSpeed));
-
-		int tracersSum = 0;
-
 		/** Loop on points indices then on trajectories */
-		var longEnoughTraj = trajectories;
-		int longEnoughTrajCount = 0;
-		int maxPointsInOneTraj = trajectories.Max(tr => tr.Points.Length) / tracerSpacing * tracerSpacing;
+		await Task.Run(() => {
+			var longEnoughTraj = trajectories;
+			int longEnoughTrajCount = 0;
+			int maxPointsInOneTraj = trajectories.Max(tr => tr.Points.Length) / tracerSpacing * tracerSpacing;
+			int tracersSum = 0;
+			for (int p = 0; p < maxPointsInOneTraj; p++) {
+				if (p % tracerSpacing == 0) {
+					tracersSum += longEnoughTrajCount;
+					longEnoughTraj = longEnoughTraj.Where(t => p < (int) (t.Points.Length / tracerSpacing) * tracerSpacing).ToArray();
+					longEnoughTrajCount = longEnoughTraj.Length;
+				}
 
-		for (int p = 0; p < maxPointsInOneTraj; p++) {
-			if (p % tracerSpacing == 0) {
-				tracersSum += longEnoughTrajCount;
-				longEnoughTraj = longEnoughTraj.Where(t => p < (int)(t.Points.Length / tracerSpacing) * tracerSpacing).ToArray();
-				longEnoughTrajCount = longEnoughTraj.Length;
+				// Loop on trajectories containing at least p indices
+				for (int t = 0; t < longEnoughTrajCount; t++) {
+					var traj = longEnoughTraj[t];
+					var point = traj.Points[p];
+
+					int pixelIndex = t + tracersSum + (p % tracerSpacing) * tracersCount;
+					positionsTextureData[pixelIndex] = point;
+					colorsTextureData[pixelIndex] = traj.Color;
+				}
 			}
+		}, cancellationToken).ConfigureAwait(true);
 
-			// Loop on trajectories containing at least p indices
-			for (int t = 0; t < longEnoughTrajCount; t++) {
-				var traj = longEnoughTraj[t];
-				var point = traj.Points[p];
-
-				int pixelIndex = t + tracersSum + (p % tracerSpacing) * tracersCount;
-				positionsTextureData[pixelIndex] = point;
-				colorsTextureData[pixelIndex] = traj.Color;
-			}
-		}
-
+		//Apply textures modif
 		_positionsTexture.Apply();
 		_colorsTexture.SetPixels32(colorsTextureData);
 		_colorsTexture.Apply();
 
 		//Apply value to VFX
-		//_visualEffect.Reinit();
+		_visualEffect.Reinit();     //Reset vfx otherwise all particules are mixed up between trajectories (colors are mixed)
+		_visualEffect.SetUInt("TracersCount", Convert.ToUInt32(tracersCount));
+		_visualEffect.SetUInt("PositionsCount", Convert.ToUInt32(positionsCount));
+		_visualEffect.SetUInt("AnimationSpeed", Convert.ToUInt32(AnimationSpeed));
 		_visualEffect.SetTexture("Positions", _positionsTexture);
 		_visualEffect.SetTexture("Colors", _colorsTexture);
 
@@ -122,37 +120,6 @@ public class TracerInjectionGridGpuBuilder : Builder {
             _visualEffect.SetTexture("Colors", _colorsTexture);
         }*/
 	}
-
-	/** Old Method
-	private Texture2D _texture;    //We need to keep a ref to the texture because SetTexture only make a binding.
-	protected override async Task Build(CancellationToken cancellationToken) {
-		var trajectories = TrajectoriesManager.Instance.Trajectories;
-		_texture = new Texture2D(trajectories.Max(t => t.Points.Length), trajectories.Length, TextureFormat.RGBAFloat, false);
-
-		var textureData = _texture.GetRawTextureData<Vector4>();
-
-		for (int y = 0; y < _texture.height; y++) {
-			var trajectory = trajectories[y];
-			for (int x = 0; x < trajectory.Points.Length; x++) {
-				Vector4 pixel = trajectory.Points[x];
-				pixel.w = trajectory.Points.Length;     //Store length of the trajectory in the alpha channel to be used in the vfx
-
-				textureData[y * _texture.width + x] = pixel;
-			}
-		}
-
-		_texture.Apply();
-
-		//Apply value to VFX
-		_visualEffect.Reinit();		//Reset vfx otherwise all particules are mixed up between trajectories (colors are mixed)
-		_visualEffect.SetUInt("TextureWidth", Convert.ToUInt32(_texture.width));
-		_visualEffect.SetUInt("TrajectoriesCount", Convert.ToUInt32(trajectories.Length));
-		_visualEffect.SetTexture("Trajectories", _texture);
-	}*/
-
-	//Scale an input value that goes between 0 and max, to be in range 0 to 1.
-	private float ScaleToRange01(float value, float max) => value / max;
-	private static float PositionToColor(float position) => position * 1f / 20;
 
 	public int GetTotalParticlesCount() => _visualEffect != null ? _visualEffect.aliveParticleCount : 0;
 

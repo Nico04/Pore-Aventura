@@ -200,7 +200,7 @@ public class Trajectory {
 	public Vector3 StartPoint => Points[0];
 
 	private float[] _distances;
-	public float[] Distances => _distances ?? (_distances = BuildDistances());      //OPTI remove if streamLine only use Vfx method that doesn't need this.
+	public float[] Distances => _distances ?? (_distances = BuildDistances()); 
 
 	public enum Types { InjectionGrid, Manual }
 	public Types Type; 
@@ -271,7 +271,7 @@ public class Trajectory {
 	private float[] BuildDistances() {
 		var distances = new float[Points.Length - 1];
 		for (int i = 0; i < distances.Length; i++)
-			distances[i] = Vector3.Distance(Points[i + 1], Points[i]);
+			distances[i] = Vector3.Distance(Points[i], Points[i + 1]);
 
 		return distances;
 	}

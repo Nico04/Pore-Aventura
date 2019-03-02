@@ -1600,7 +1600,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1235011586
 Transform:
   m_ObjectHideFlags: 0
@@ -1622,7 +1622,7 @@ VFXRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1235011585}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -1680,6 +1680,9 @@ VisualEffect:
       m_Array: []
     m_Uint:
       m_Array:
+      - m_Value: 8
+        m_Name: SegmentCount
+        m_Overridden: 0
       - m_Value: 3
         m_Name: TextureWidth
         m_Overridden: 0
@@ -1693,6 +1696,12 @@ VisualEffect:
       m_Array: []
     m_NamedObject:
       m_Array:
+      - m_Value: {fileID: 0}
+        m_Name: Alphas
+        m_Overridden: 0
+      - m_Value: {fileID: 0}
+        m_Name: Colors
+        m_Overridden: 0
       - m_Value: {fileID: 2800000, guid: f1194d9b3428f524aac4396f56a868c9, type: 3}
         m_Name: Trajectories
         m_Overridden: 0
@@ -2125,9 +2134,9 @@ MonoBehaviour:
     - Tracers Visibility <i>(default : <color=#ffffffff>c</color>)</i>\r\n - Tracers
     GPU Visibility <i>(default : <color=#ffffffff>Alt + c</color>)</i>\r\n - Streamlines
     Visibility <i>(default : <color=#ffffffff>v</color>)</i>\r\n - Streamlines GPU
-    Visibility <i>(default : <color=#ffffffff>Alt + v</color>)</i>\r <color=#ffffffff>[SOON]</color>\n
-    - Grid Maps Visibility <i>(default : <color=#ffffffff>b</color>)</i>\r\n - Pause/Resume
-    <i>(default : <color=#ffffffff>Escape</color>)</i></color>\n\n<color=#858585><size=14>(Mapping
+    Visibility <i>(default : <color=#ffffffff>Alt + v</color>)</i>\r\n - Grid Maps
+    Visibility <i>(default : <color=#ffffffff>b</color>)</i>\r\n - Pause/Resume <i>(default
+    : <color=#ffffffff>Escape</color>)</i></color>\n\n<color=#858585><size=14>(Mapping
     can be changed at startup in the input section)</size></color>"
 --- !u!222 &1573287552
 CanvasRenderer:

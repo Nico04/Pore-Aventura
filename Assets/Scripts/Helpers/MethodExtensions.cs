@@ -58,6 +58,11 @@ public static class MethodExtensions {
         return $"({output[0]},{output[1]},{output[2]})";
     }*/
 
+    public static float Remap(this float value, float currentRangeMin, float currentRangeMax, float newRangeMin, float newRangeMax, bool clamp) {
+        var newValue = (value - currentRangeMin) / (currentRangeMax - currentRangeMin) * (newRangeMax - newRangeMin) + newRangeMin;
+        return clamp ? Mathf.Clamp(newValue, newRangeMin, newRangeMax) : newValue;
+    }
+
     public static Vector3 SetCoordinate(this Vector3 vector, float? x = null, float? y = null, float? z = null) {
         if (x != null)
             vector.x = x.GetValueOrDefault();
@@ -67,6 +72,8 @@ public static class MethodExtensions {
             vector.x = z.GetValueOrDefault();
         return vector;
     }
+
+    public static Vector4 ToVector4(this Vector3 vector3, float w) => new Vector4(vector3.x, vector3.y, vector3.z, w);
 
 	private static readonly System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
     public static void LogWithElapsedTime(string message) {

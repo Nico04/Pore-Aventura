@@ -120,12 +120,12 @@ public class VisibilityControler : MonoBehaviour {
 			text += "\n" + ColorizeUiText(builder.Name, builder.IsVisible ? Color.white : Color.gray);
 
 			//Second part
-			if (builder.IsBuilding)
-				text += $" <Building...>";
-
-			//Third part
 			if (builder.Type == Builder.Types.Gpu)
 				text += " [GPU]";
+
+			//Third part
+			if (builder.IsBuilding)
+				text += " <Building...>";
 		}
 
 		BuildersStatusText.text = text;
