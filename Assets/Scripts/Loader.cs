@@ -18,7 +18,7 @@ public class Loader : MonoBehaviour {
 	private async void Start() {
         try {
             _loading = true;
-            await Load(DataBase.LoadData).ConfigureAwait(true);
+            await Load(DataBase.InitData).ConfigureAwait(true);
         } catch (Exception e) {
             _loadingError = true;
 

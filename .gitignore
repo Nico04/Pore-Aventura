@@ -5,8 +5,9 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
-Assets/StreamingAssets/
 Assets/AssetStoreTools*
+Assets/StreamingAssets/*.*
+!Assets/StreamingAssets/*.txt
 *.stackdump
 
 # Unity3D generated file on crash reports

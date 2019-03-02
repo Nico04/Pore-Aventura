@@ -50,9 +50,8 @@ public class TrajectoriesManager : MonoBehaviour {
 
 		try {
 			//If no build is currently running, start the building process
-			if (_currentBuildTask == null) {
+			if (_currentBuildTask == null) 
 				_currentBuildTask = Task.Run(() => BuildInjectionGridTrajectories(), cancellationToken);
-			}
 
 			//Wait the process to finish
 			return (_trajectories = await _currentBuildTask.ConfigureAwait(false));
@@ -62,7 +61,6 @@ public class TrajectoriesManager : MonoBehaviour {
 	}
 
 	private Trajectory[] BuildInjectionGridTrajectories() {
-		Debug.Log("Start BuildInjectionGridTrajectories");
 		var trajectories = new List<Trajectory>();
 
 		//Loop through all injection point

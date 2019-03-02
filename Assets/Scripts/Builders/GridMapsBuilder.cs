@@ -11,10 +11,20 @@ public class GridMapsBuilder : Builder {
 
 	private SolidBoundariesBuilder _solidBoundariesBuilder;
 
+	private const int TextureResolution = 256;
+	private Vector2 _worldToPixelRatio;
+
 	protected override void Start() {
 		base.Start();
 
 		_solidBoundariesBuilder = SolidBoundariesHolder.GetComponent<SolidBoundariesBuilder>();
+
+		//Set sizes and positions
+		gameObject.transform.localScale = new Vector3(1f, DataBase.DataSpaceSize.y, DataBase.DataSpaceSize.z);
+		Exit.transform.position = Exit.transform.position.SetCoordinate(x: 0.99f * DataBase.DataSpaceSize.x);
+
+		//Set world to texture coordinates converter ratio
+		_worldToPixelRatio = new Vector2(DataBase.DataSpaceSize.z, DataBase.DataSpaceSize.y) / TextureResolution;
 	}
 
 	protected override async Task Build(CancellationToken cancellationToken) {
@@ -22,110 +32,27 @@ public class GridMapsBuilder : Builder {
 		await BuildGridMapsSoapBubble(cancellationToken).ConfigureAwait(false);
 	}
 
-	/** Old pixelated method
-	private void BuildGridMaps() {
-		var trajectories = TrajectoriesManager.Instance.Trajectories;
-		var entryResolution = TrajectoriesManager.Instance.Resolution;
-
-		//--- Entry Map ---
-		var entryTexture = GetNewTexture(entryResolution);
-
-		//Fill with default color
-		var entryTextureArray = FillPixels(entryTexture, Color.black);
-
-		//Fill texture
-		foreach (var trajectory in trajectories) {
-			//Get pixel position (x & y) of the trajectory start point world position (y and z)
-			int x = CoordinateToPixelIndex(trajectory.StartPoint.z, TrajectoriesManager.Instance.Spacing);
-			int y = CoordinateToPixelIndex(trajectory.StartPoint.y, TrajectoriesManager.Instance.Spacing);
-			entryTextureArray[y * entryTexture.width + x] = trajectory.Color;
-		}
-
-		//Apply
-		entryTexture.SetPixels32(entryTextureArray);
-		entryTexture.Apply();
-		Entry.GetComponent<Renderer>().material.SetTexture("_UnlitColorMap", entryTexture);
-
-		//--- Exit Map ---
-		//Get positions that intersect the exit plan
-		List<PointColor3> intersectingPoints = new List<PointColor3>();
-
-		foreach (var trajectory in trajectories) {
-			//Find the first point which has a x < to the exit.x, starting from the end
-			Vector3 point = Vector3.zero;
-			int currentPointIndex = trajectory.Points.Length - 1;
-			while (currentPointIndex >= 0 && trajectory.Points[currentPointIndex].x >= Exit.transform.position.x) {
-				point = trajectory.Points[currentPointIndex];
-				currentPointIndex--;
-			}
-
-			//Skip this trajectory if it's too short
-			if (point == Vector3.zero)
-				continue;
-
-			intersectingPoints.Add(new PointColor3 {
-				Position = point,
-				Color = trajectory.Color
-			});
-		}
-
-		//Find the smallest distance 
-		float distanceMin = TrajectoriesManager.Instance.Spacing;
-
-		for (int i = 0; i < intersectingPoints.Count; i++) {
-			for (int j = 0; j < intersectingPoints.Count; j++) {
-				if (i == j) continue;
-
-				var dist = Vector3.Distance(intersectingPoints[i].Position, intersectingPoints[j].Position);
-
-				if (dist < distanceMin && dist > 0.03f)
-					distanceMin = dist;
-			}
-		}
-
-		//Create texture
-		int exitResolution = (int)(DataBase.DataSpaceSize.y / distanceMin);
-		var exitTexture = GetNewTexture(exitResolution);
-
-		//Fill with default color
-		var exitTextureArray = FillPixels(exitTexture, Color.black);
-
-		//Fill texture
-		foreach (var point in intersectingPoints) {
-			//Get pixel position (x & y) of the trajectory start point world position (y and z)
-			int x = CoordinateToPixelIndex(point.Position.z, distanceMin);
-			int y = CoordinateToPixelIndex(point.Position.y, distanceMin);
-			exitTextureArray[y * exitTexture.width + x] = point.Color;
-		}
-
-		//Apply
-		exitTexture.SetPixels32(exitTextureArray);
-		exitTexture.Apply();
-		Exit.GetComponent<Renderer>().material.SetTexture("_UnlitColorMap", exitTexture);
-	}*/
-
-	private const int TextureResolution = 256;
-
 	//Build deux maps with the Soap Bubble / Vonoroï like algo 
 	private async Task BuildGridMapsSoapBubble(CancellationToken cancellationToken) {
+		//Get input data
 		var trajectories = await TrajectoriesManager.Instance.GetInjectionGridTrajectories(cancellationToken).ConfigureAwait(true);
-		float textureSpacing = DataBase.DataSpaceSize.y / TextureResolution;
 
 		//--- Entry Map ---
+		//Set map position
+		Entry.transform.position = Entry.transform.position.SetCoordinate(x: trajectories[0].StartPoint.x);
+
 		//Build a list of PointColor of the trajectories that intersect the plan, in the texture coordinates
 		List<PointColor2> entryPoints = null;
 		await Task.Run(() => {
 			entryPoints = trajectories.Select(t => new PointColor2 {
-				Position = new Vector2(
-					CoordinateToPixelIndex(t.StartPoint.z, textureSpacing),
-					CoordinateToPixelIndex(t.StartPoint.y, textureSpacing)),
+				Position = WorldToPixelCoordinates(t.StartPoint),
 				Color = t.Color
 			}).ToList();
 		}, cancellationToken).ConfigureAwait(true);
 		
 
 		//Build texture
-		await BuildGridMapSoapBubble(entryPoints, textureSpacing, Entry, cancellationToken).ConfigureAwait(true);
+		await BuildGridMapSoapBubble(entryPoints, Entry, cancellationToken).ConfigureAwait(true);
 
 		//--- Exit Map ---
 		//Build a list of PointColor of the trajectories that intersect the plan, in the texture coordinates
@@ -147,20 +74,18 @@ public class GridMapsBuilder : Builder {
 					continue;
 
 				exitPoints.Add(new PointColor2 {
-					Position = new Vector2(
-						CoordinateToPixelIndex(point.z, textureSpacing),
-						CoordinateToPixelIndex(point.y, textureSpacing)),
+					Position = WorldToPixelCoordinates(point),
 					Color = trajectory.Color
 				});
 			}
 		}, cancellationToken).ConfigureAwait(true);
 
 		//Build texture
-		await BuildGridMapSoapBubble(exitPoints, textureSpacing, Exit, cancellationToken).ConfigureAwait(false);
+		await BuildGridMapSoapBubble(exitPoints, Exit, cancellationToken).ConfigureAwait(false);
 	}
 
 	//Build a Map with the Soap Bubble / Vonoroï like algo 
-	private async Task BuildGridMapSoapBubble(List<PointColor2> points, float textureSpacing, GameObject textureHolder, CancellationToken cancellationToken) {
+	private async Task BuildGridMapSoapBubble(List<PointColor2> points, GameObject textureHolder, CancellationToken cancellationToken) {
 		cancellationToken.ThrowIfCancellationRequested();
 
 		var textureHolderPositionX = textureHolder.transform.position.x;
@@ -178,18 +103,11 @@ public class GridMapsBuilder : Builder {
 				var currentPoint = new Vector2(p % textureWidth, (int)(p / textureWidth));
 
 				//if this pixel is INTO a microstructure sphere, set it to white and continue;
-				bool isInsideSolidBounds = false;
-				var currentPositionInSpace = new Vector3(textureHolderPositionX, currentPoint.y * textureSpacing, currentPoint.x * textureSpacing);
-				foreach (var position in _solidBoundariesBuilder.Positions) {
-					if (Vector3.Distance(currentPositionInSpace, position) < 1f) {
-						textureArray[p] = Color.white;
-						isInsideSolidBounds = true;
-						break;
-					}
-				}
-				if (isInsideSolidBounds)
+				var currentPositionInSpace = PixelToWorldCoordinates(textureHolderPositionX, currentPoint);
+				if (SolidBoundariesBuilder.Contains(currentPositionInSpace)) {
+					textureArray[p] = Color.white;
 					continue;
-				
+				}
 
 				//Find the closest point
 				PointColor2 closestPoint = null;
@@ -229,9 +147,11 @@ public class GridMapsBuilder : Builder {
 		return textureArray;
 	}
 
-	private int CoordinateToPixelIndex(float coordinate, float spacing) {
-		return Mathf.FloorToInt(coordinate / spacing);
-	}
+	private Vector2 WorldToPixelCoordinates(Vector3 worldPosition) => 
+		new Vector2(worldPosition.z, worldPosition.y) / _worldToPixelRatio;
+
+	private Vector3 PixelToWorldCoordinates(float worldX, Vector2 pixelPosition) => 
+		new Vector3(worldX, pixelPosition.y * _worldToPixelRatio.y, pixelPosition.x * _worldToPixelRatio.x);
 }
 
 public struct PointColor3 {

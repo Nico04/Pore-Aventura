@@ -58,10 +58,20 @@ public static class MethodExtensions {
         return $"({output[0]},{output[1]},{output[2]})";
     }*/
 
+    public static Vector3 SetCoordinate(this Vector3 vector, float? x = null, float? y = null, float? z = null) {
+        if (x != null)
+            vector.x = x.GetValueOrDefault();
+        if (y != null)
+            vector.x = y.GetValueOrDefault();
+        if (z != null)
+            vector.x = z.GetValueOrDefault();
+        return vector;
+    }
+
 	private static readonly System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
     public static void LogWithElapsedTime(string message) {
 		string timeElapsed = Mathf.RoundToInt((float)StopWatch.Elapsed.TotalMilliseconds) + "ms";
-        Debug.Log(message + (StopWatch.IsRunning ? $" ({timeElapsed})" : ""));
+        //Debug.Log(message + (StopWatch.IsRunning ? $" ({timeElapsed})" : ""));
         Messager.AddMessage((StopWatch.IsRunning ? $" ({timeElapsed})" + (!string.IsNullOrEmpty(message) ? Environment.NewLine : "") : "") + message);
 
         StopWatch.Restart();
