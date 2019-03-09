@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: FlexContainer
   m_EditorClassIdentifier: 
   m_simpleMode: 1
-  m_simpleMaxParticles: 10000
+  m_simpleMaxParticles: 400000
   m_simpleSubstepCount: 2
   m_simpleIterationCount: 5
-  m_simpleGravity: {x: 0, y: -9.81, z: 0}
-  m_simpleParticleSize: 0.1
+  m_simpleGravity: {x: 0, y: 0, z: 0}
+  m_simpleParticleSize: 0.2
   m_simpleParticleFriction: 0.1
   m_simpleParticleRestitution: 0
   m_simpleParticleAdhesion: 0
@@ -32,19 +32,19 @@ MonoBehaviour:
   m_simpleFluidAnisotropy: 2
   m_simpleFluidMinScale: 0.2
   m_simpleFluidMaxScale: 1
-  m_maxParticles: 10000
+  m_maxParticles: 400000
   m_maxDiffuse: 0
-  m_maxNeighbors: 100
+  m_maxNeighbors: 200
   m_maxContacts: 6
   m_recreateSolver: 0
-  m_substepCount: 3
+  m_substepCount: 2
   m_iterationCount: 5
-  m_gravity: {x: 0, y: -9.81, z: 0}
-  m_radius: 0.2
-  m_solidRest: 0.1
-  m_fluidRest: 0.1
-  m_staticFriction: 0.3
-  m_dynamicFriction: 0.2
+  m_gravity: {x: 0, y: 0, z: 0}
+  m_radius: 0.3
+  m_solidRest: 0.2
+  m_fluidRest: 0.19
+  m_staticFriction: 0.1
+  m_dynamicFriction: 0.1
   m_particleFriction: 0.1
   m_restitution: 0
   m_adhesion: 0
@@ -59,11 +59,11 @@ MonoBehaviour:
   m_lift: 0
   m_fluid: 1
   m_cohesion: 0.025
-  m_surfaceTension: 0
+  m_surfaceTension: 0.01
   m_viscosity: 0
   m_vorticityConfinement: 0
   m_anisotropyScale: 2
-  m_anisotropyMin: 0.1
+  m_anisotropyMin: 0.2
   m_anisotropyMax: 1
   m_smoothing: 0
   m_solidPressure: 0
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_diffuseLifetime: 0
   m_plasticThreshold: 0
   m_plasticCreep: 0
-  m_collisionDistance: 0.05
+  m_collisionDistance: 0.1
   m_particleCollisionMargin: 0
   m_shapeCollisionMargin: 0
   m_planes: []
