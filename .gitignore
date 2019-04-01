@@ -54,6 +54,3 @@ Assets/StreamingAssets/crashlytics-build.properties
 .DS_Store*
 [Tt]humbs.db
 [Dd]esktop.ini
-
-# Project specific
-/Resources/
